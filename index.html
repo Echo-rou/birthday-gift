@@ -165,6 +165,13 @@
     border-radius: 999px; padding: 7px 16px; cursor: pointer;
     backdrop-filter: blur(4px);
   }
+  #musicBtn {
+    position: fixed; top: 16px; right: 16px; z-index: 85;
+    font-size: 12px; letter-spacing: 2px; color: rgba(255,255,255,.85);
+    background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.25);
+    border-radius: 999px; padding: 7px 14px; cursor: pointer;
+    backdrop-filter: blur(4px);
+  }
 </style>
 </head>
 <body>
@@ -214,6 +221,8 @@
 
 <canvas id="confetti"></canvas>
 <button id="replay" hidden onclick="replay()">↺ 再看一遍</button>
+<audio id="bgm" src="bgm.mp3" preload="auto" loop></audio>
+<button id="musicBtn" hidden onclick="toggleMusic(event)">♪ 开</button>
 
 <script>
 /* =====================================================================
@@ -240,6 +249,15 @@ const CONFIG = {
     { photo: "", date: "三十岁", title: "新的开始", text: "最后一张照片，写给三十岁的她：往后都是坦途，生日快乐。" },
   ],
   flashExtra: [],
+  /* 快闪卡点：照片按时间从旧到新排列；bgm.mp3 放进仓库即自动配乐同步 */
+  montageOrder: [
+    "photos/f01.jpg", "photos/p02.jpg", "photos/f02.jpg", "photos/f03.jpg",
+    "photos/p01.jpg", "photos/p03.jpg", "photos/f08.jpg", "photos/f09.jpg",
+    "photos/f04.jpg", "photos/f07.jpg", "photos/p07.jpg", "photos/p08.jpg",
+    "photos/f10.jpg", "photos/f12.jpg", "photos/p04.jpg", "photos/p05.jpg",
+    "photos/f11.jpg", "photos/p09.jpg", "photos/f06.jpg", "photos/p10.jpg",
+  ],
+  holdPhoto: "photos/p06.jpg",   // 高潮白闪后定格的那张（仙女棒回眸）
   videoHeading: "今 年 的 这 一 章",
   video: "video.mp4",
   letter: [
@@ -250,10 +268,10 @@ const CONFIG = {
   footer: "这个网址每年都会更新新的故事\n这张卡片，永远不会过期",
 };
 
-/* ---------- 开场快闪节奏（毫秒） ---------- */
-const FLASH_MS = 160;      // 第一轮每张
-const FLASH2_MS = 240;     // 第二轮每张
-const WHITE_MS = 90;       // 两轮之间白闪
+/* ---------- 开场快闪节奏：午夜巡航式卡点 ----------
+   结构：前奏每2拍1张 → 鼓点每拍1张 → 高潮每半拍1张 → 白闪 → 定格王牌照 → 熄屏
+   bgm.mp3 放进仓库后会与画面同时起播；没有音乐就按 BPM 静默节拍走 */
+const MONTAGE_BPM = 150;   // 拿到 bgm 后按歌的实际 BPM 微调
 const BLACK_HOLD = 1600;   // 快闪结束、熄屏停留
 
 /* ---------- 页面逻辑 ---------- */
@@ -268,6 +286,7 @@ for (let i = 0; i < 70; i++) {
 }
 
 let flashTimer = null;
+const timers = [];
 
 function openGift() {
   document.getElementById("cover").style.display = "none";
@@ -276,8 +295,18 @@ function openGift() {
   buildStory();
   window.scrollTo(0, 0);
   document.getElementById("replay").hidden = false;
+  document.getElementById("musicBtn").hidden = false;
   confetti();
   playFlash();
+}
+
+/* 背景音乐开关 */
+function toggleMusic(e) {
+  e.stopPropagation();
+  const bgm = document.getElementById("bgm");
+  if (!bgm) return;
+  bgm.muted = !bgm.muted;
+  document.getElementById("musicBtn").textContent = bgm.muted ? "♪ 关" : "♪ 开";
 }
 
 function buildStory() {
@@ -320,22 +349,31 @@ function buildStory() {
   document.querySelectorAll(".vphoto").forEach(el => io.observe(el));
 }
 
-/* ---------- 走马灯快闪（覆盖层）：自动播，轻触可跳过 ---------- */
+/* ---------- 走马灯快闪（覆盖层）：卡点引擎，自动播，轻触可跳过 ---------- */
 function playFlash() {
+  clearTimeout(flashTimer);
   const fw = document.getElementById("flashwrap");
   const box = document.getElementById("flashFrames");
   box.innerHTML = "";
-  const seq = CONFIG.memories.map(m => ({ photo: m.photo, date: m.date, title: m.title }));
-  (CONFIG.flashExtra || []).forEach(p => seq.push({ photo: p, date: "", title: "" }));
-  if (!seq.length) { fw.hidden = true; return; }
+  const pool = (CONFIG.montageOrder && CONFIG.montageOrder.length)
+    ? CONFIG.montageOrder.slice()
+    : CONFIG.memories.map(m => m.photo).filter(Boolean).concat(CONFIG.flashExtra || []);
+  if (!pool.length) { fw.hidden = true; return; }
 
+  const seq = pool.map(p => ({ photo: p, date: "", title: "" }));
   seq.forEach(f => {
     const frame = document.createElement("div");
     frame.className = "f-frame" + (f.photo ? "" : " nophoto");
     if (f.photo) {
       const im = new Image();
       im.src = f.photo; im.draggable = false;
-      im.onerror = () => { frame.classList.add("nophoto"); im.remove(); };
+      im.onerror = () => {
+        frame.classList.add("nophoto"); im.remove();
+        if (!frame.children.length) {
+          const t = document.createElement("div"); t.className = "f-title"; t.textContent = "♪";
+          frame.appendChild(t);
+        }
+      };
       frame.appendChild(im);
     } else {
       const d = document.createElement("div"); d.className = "f-date"; d.textContent = f.date;
@@ -344,31 +382,57 @@ function playFlash() {
     }
     box.appendChild(frame);
   });
+  /* 定格帧：高潮白闪后停留的王牌照 */
+  if (CONFIG.holdPhoto) {
+    const frame = document.createElement("div");
+    frame.className = "f-frame";
+    const im = new Image();
+    im.src = CONFIG.holdPhoto; im.draggable = false;
+    im.onerror = () => { frame.classList.add("nophoto"); im.remove(); };
+    frame.appendChild(im);
+    box.appendChild(frame);
+  }
 
   fw.hidden = false;
   const frames = Array.from(box.children);
-  const pass = (ms, done) => {
-    frames.forEach((el, i) => {
-      flashTimer = setTimeout(() => {
-        frames.forEach(x => x.style.opacity = "0");
-        el.style.opacity = "1";
-      }, i * ms);
-    });
-    flashTimer = setTimeout(done, frames.length * ms);
-  };
-  pass(FLASH_MS, () => {
-    const wf = document.getElementById("whiteflash");
+  const show = k => frames.forEach((x, i) => x.style.opacity = i === k ? "1" : "0");
+  const wf = document.getElementById("whiteflash");
+  const beat = 60000 / MONTAGE_BPM;
+  const nBurst = frames.length - (CONFIG.holdPhoto ? 1 : 0);
+  let t = 0, idx = 0;
+
+  for (let i = 0; i < 4 && idx < nBurst; i++) {          // 前奏：每2拍1张
+    timers.push(setTimeout(() => show(idx), Math.round(t)));
+    t += beat * 2; idx++;
+  }
+  while (idx < nBurst - 4) {                              // 鼓点：每拍1张
+    timers.push(setTimeout(() => show(idx), Math.round(t)));
+    t += beat; idx++;
+  }
+  while (idx < frames.length) {                           // 高潮：每半拍1张
+    timers.push(setTimeout(() => show(idx), Math.round(t)));
+    t += beat * 0.5; idx++;
+  }
+  timers.push(setTimeout(() => {                          // 白闪
     wf.style.transition = "none"; wf.style.opacity = "0.92";
-    flashTimer = setTimeout(() => {
-      wf.style.transition = "opacity .25s"; wf.style.opacity = "0";
-      pass(FLASH2_MS, endFlash);
-    }, WHITE_MS);
-  });
+  }, Math.round(t)));
+  t += beat;
+  timers.push(setTimeout(() => {                          // 定格王牌照
+    wf.style.transition = "opacity .25s"; wf.style.opacity = "0";
+    show(frames.length - 1);
+  }, Math.round(t)));
+  t += beat * 4;
+  timers.push(setTimeout(endFlash, Math.round(t)));
+
+  /* 音乐与画面同时起播；没有 bgm.mp3 时静默按节拍走 */
+  const bgm = document.getElementById("bgm");
+  if (bgm) { bgm.currentTime = 0; bgm.play().catch(() => {}); }
 }
 
 /* 突然熄屏 → 停留 → 化开回到故事顶部 */
 function endFlash() {
   clearTimeout(flashTimer);
+  timers.forEach(clearTimeout); timers.length = 0;
   const fw = document.getElementById("flashwrap");
   const skip = document.getElementById("flashSkip");
   skip.style.display = "none";
