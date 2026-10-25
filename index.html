@@ -23,16 +23,39 @@
   @keyframes twinkle { 0%,100% { opacity: .15; } 50% { opacity: .9; } }
   #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 90; }
 
-  /* ============ 封面：拆礼物 ============ */
+  /* ============ 封面：照片 + 宋体排版 ============ */
   #cover {
-    min-height: 100vh; min-height: 100dvh;
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: center; text-align: center;
+    position: relative; height: 100vh; height: 100dvh;
+    cursor: pointer; overflow: hidden;
   }
-  .box { font-size: 84px; cursor: pointer; user-select: none;
-    animation: bounce 1.6s ease-in-out infinite; }
-  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
-  .hint { margin-top: 28px; font-size: 17px; letter-spacing: 2px; opacity: .85; }
+  .coverbg {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; opacity: .88;
+  }
+  .coverveil {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(6,5,16,.45) 0%, rgba(6,5,16,.22) 42%, rgba(6,5,16,.9) 100%);
+  }
+  .coverinner {
+    position: relative; z-index: 2; height: 100%;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    align-items: center; padding-bottom: 11vh; text-align: center;
+  }
+  .cover-kicker {
+    font-size: 11px; letter-spacing: 8px; color: rgba(255,209,102,.9); margin-bottom: 24px;
+    text-shadow: 0 1px 10px rgba(0,0,0,.6);
+  }
+  .cover-title {
+    font-family: "Songti SC", "STSong", "STZhongsong", "SimSun", serif;
+    font-size: 40px; font-weight: 600; letter-spacing: 10px; line-height: 1.65;
+    text-shadow: 0 2px 26px rgba(0,0,0,.7);
+  }
+  .cover-line { width: 46px; height: 1px; background: rgba(255,209,102,.85); margin: 26px auto 20px; }
+  .cover-sub { font-size: 14px; letter-spacing: 3px; opacity: .82; text-shadow: 0 1px 10px rgba(0,0,0,.6); }
+  .cover-hint {
+    margin-top: 42px; font-size: 12px; letter-spacing: 3px; color: rgba(255,255,255,.6);
+    animation: cueup 2.4s ease-in-out infinite;
+  }
 
   /* ============ 故事流：每一环占满一屏，上下滑自由穿行 ============ */
   #story[hidden] { display: none; }
@@ -150,9 +173,16 @@
 </head>
 <body>
 
-<div id="cover">
-  <div class="box" onclick="openGift()">🎁</div>
-  <p class="hint">点一下，拆开你的礼物</p>
+<div id="cover" onclick="openGift()">
+  <img class="coverbg" src="assets/cover.jpg" alt="">
+  <div class="coverveil"></div>
+  <div class="coverinner">
+    <div class="cover-kicker">TO · MY · DEAREST · SISTER</div>
+    <h1 class="cover-title">姐姐<br>三十岁生日快乐</h1>
+    <div class="cover-line"></div>
+    <p class="cover-sub">这里装着我们一起走过的日子</p>
+    <p class="cover-hint">轻触任意处 · 开启礼物</p>
+  </div>
 </div>
 
 <div id="story" hidden>
@@ -212,12 +242,16 @@ const CONFIG = {
   subtitle: "三十而已，未来可期",
   openingVideo: "opening.mp4",   // 剪映导出的开场卡点视频
   memories: [
-    { photo: "", date: "1996", title: "她来啦", text: "出生那年的小故事写在这里——第一次见到这个小家伙的人，都说她将来一定不得了。" },
-    { photo: "", date: "年份", title: "小小少年", text: "童年的一张照片配一句话：那时候的她，最爱做的事情是什么？" },
-    { photo: "", date: "年份", title: "学生时代", text: "校服、课桌、和好朋友们。挑一张那时候的照片放进来。" },
-    { photo: "", date: "年份", title: "长大成人", text: "工作、远方、她一个人扛过的那些事。" },
-    { photo: "", date: "这几年", title: "我们的合照", text: "挑一张你们俩的合影，写一句只有你们懂的话。" },
-    { photo: "", date: "三十岁", title: "新的开始", text: "最后一张照片，写给三十岁的她：往后都是坦途，生日快乐。" },
+    { photo: "photos/076.jpg", date: "2025 · 夏", title: "草原上的风", text: "往风里站的人，多少岁都拦不住。" },
+    { photo: "photos/164.jpg", date: "2025 · 夏夜", title: "她呀", text: "花墙前回头的那一秒，比整条街的灯都亮。" },
+    { photo: "photos/168.jpg", date: "2025 · 夜", title: "灯笼与长裙", text: "金色的裙子，走过一整条挂满灯笼的街。" },
+    { photo: "photos/014.jpg", date: "2023 · 秋", title: "四川中路", text: "路牌指向的方向，都会是好日子。" },
+    { photo: "photos/099.jpg", date: "2025 · 国庆", title: "山间的云", text: "你随手拍下的云，我替你存进三十岁。" },
+    { photo: "photos/107.jpg", date: "2026 · 元旦", title: "一桌热气腾腾", text: "人齐了，菜烫了，家就有了味道。" },
+    { photo: "photos/112.jpg", date: "2026 · 除夕", title: "烟花照旧", text: "烟花年年放，最好看的是抬头时，身边是自家人。" },
+    { photo: "photos/119.jpg", date: "2026 · 元宵", title: "手心里的光", text: "你回头看的那一眼，比手里那把星星还亮。" },
+    { photo: "photos/142.jpg", date: "2026 · 夏", title: "躺平的小猫", text: "连猫都懂：跟你待着的地方，最安心。" },
+    { photo: "photos/152.jpg", date: "2026 · 九月", title: "比个耶再出发", text: "笑起来还是二十岁的样子。姐，三十岁快乐，往后每一年都要这么笑。" },
   ],
   videoHeading: "今 年 的 这 一 章",
   video: "video.mp4",
