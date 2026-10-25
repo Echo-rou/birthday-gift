@@ -20,6 +20,7 @@
     pointer-events: none;
   }
   @keyframes twinkle { 0%,100% { opacity: .15; } 50% { opacity: .9; } }
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 9; }
   main {
     max-width: 560px; margin: 0 auto; padding: 48px 24px 64px;
     min-height: 100vh; display: flex; flex-direction: column;
@@ -29,13 +30,43 @@
     animation: bounce 1.6s ease-in-out infinite; }
   @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
   .hint { margin-top: 28px; font-size: 17px; letter-spacing: 2px; opacity: .85; }
-  h1 { font-size: 30px; margin-bottom: 24px; letter-spacing: 3px; }
+  h1 { font-size: 30px; margin: 8px 0 28px; letter-spacing: 3px; }
   video {
     width: 100%; border-radius: 16px; box-shadow: 0 12px 48px rgba(0,0,0,.5);
     background: #000; outline: none;
   }
-  #message { margin: 28px 0 8px; font-size: 16px; line-height: 2; opacity: .92; white-space: pre-line; }
-  #footer { margin-top: 32px; font-size: 14px; opacity: .55; letter-spacing: 1px; }
+  section { width: 100%; }
+  h2 {
+    font-size: 15px; letter-spacing: 6px; opacity: .6; font-weight: normal;
+    margin: 52px 0 20px; text-align: center;
+  }
+  h2::before, h2::after { content: "· · · "; opacity: .5; }
+  h2::after { content: " · · ·"; }
+  .letter {
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+    border-radius: 16px; padding: 28px 22px; text-align: left;
+    font-size: 16px; line-height: 2.1; white-space: pre-line; opacity: .95;
+  }
+  .sign { margin-top: 18px; text-align: right; font-size: 14px; opacity: .6; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid img {
+    width: 100%; aspect-ratio: 1/1; object-fit: cover;
+    border-radius: 12px; display: block; background: rgba(255,255,255,.06);
+  }
+  .timeline { text-align: left; padding-left: 6px; }
+  .t-item { position: relative; padding: 0 0 26px 26px; }
+  .t-item::before {
+    content: ""; position: absolute; left: 0; top: 6px; bottom: -6px;
+    width: 2px; background: rgba(255,255,255,.18);
+  }
+  .t-item:last-child::before { bottom: auto; height: 14px; }
+  .t-item::after {
+    content: ""; position: absolute; left: -4px; top: 4px; width: 10px; height: 10px;
+    border-radius: 50%; background: #ffd166; box-shadow: 0 0 10px #ffd166;
+  }
+  .t-date { font-size: 13px; opacity: .55; letter-spacing: 1px; }
+  .t-text { margin-top: 4px; font-size: 15px; line-height: 1.7; }
+  #footer { margin: 64px 0 0; font-size: 13px; opacity: .5; letter-spacing: 1px; line-height: 2; }
 </style>
 </head>
 <body>
@@ -47,30 +78,39 @@
   <section id="gift" hidden>
     <h1 id="greeting"></h1>
     <video id="video" controls playsinline preload="metadata"></video>
-    <div id="message"></div>
+    <div id="sec-letter"><h2>一 封 信</h2>
+      <div class="letter"><span id="letter"></span><div class="sign" id="sign"></div></div>
+    </div>
+    <div id="sec-photos"><h2>我 们 的 回 忆</h2><div class="grid" id="photos"></div></div>
+    <div id="sec-timeline"><h2>一 路 走 来</h2><div class="timeline" id="timeline"></div></div>
     <p id="footer"></p>
   </section>
 </main>
+<canvas id="confetti"></canvas>
 <script>
-/* =====================================================
-   以后想改内容，只需要修改下面 CONFIG 里的文字。
-   想换视频：把仓库里的 video.mp4 换成新文件（同名就不用改这）。
-   想改成"跳转到别的网页"：把 CONFIG 整个删掉，换成一行
-     location.replace("https://新网址");
-   ===================================================== */
+/* =====================================================================
+   以后想改内容，只需要改 CONFIG 里的文字/图片名，保存 1 分钟后生效。
+   · 不想显示某个板块：把对应数组清空 [] 即可，板块会自动隐藏。
+   · 照片：往本仓库上传 photos 文件夹（1.jpg、2.jpg…），文件名填进 photos。
+   · 想让网页直接跳转到别的网址：把 CONFIG 整段换成
+       location.replace("https://新网址");
+   ===================================================================== */
 const CONFIG = {
   name: "亲爱的小朋友",
   title: "生日快乐！",
-  lines: [
-    "第一句话写在这里。",
-    "第二句话写在这里。",
-    "视频下面可以一直往下加句子。",
-  ],
   video: "video.mp4",
-  footer: "—— 永远爱你的我",
+  letter: [
+    "信的第一段写在这里，可以写很多行。",
+    "第二段写在这里。",
+    "第三段写在这里。",
+  ].join("\n"),
+  sign: "—— 永远爱你的我",
+  photos: [],                      // 例: ["photos/1.jpg","photos/2.jpg"]
+  timeline: [],                    // 例: [["2023.05.20","第一次见面"],["2024.01.01","第一次一起看海"]]
+  footer: "这个网址每年都会更新新的故事\n这张卡片，永远不会过期",
 };
 
-// 星星背景
+/* ---------- 以下是页面逻辑，一般不用动 ---------- */
 for (let i = 0; i < 70; i++) {
   const s = document.createElement("span");
   s.className = "star";
@@ -85,13 +125,65 @@ function openGift() {
   document.getElementById("cover").hidden = true;
   const gift = document.getElementById("gift");
   gift.hidden = false;
-  document.getElementById("greeting").textContent =
-    CONFIG.name + "，" + CONFIG.title;
-  const v = document.getElementById("video");
-  v.src = CONFIG.video;
-  document.getElementById("message").textContent = CONFIG.lines.join("\n");
-  document.getElementById("footer").textContent = CONFIG.footer;
   window.scrollTo(0, 0);
+  document.getElementById("greeting").textContent = CONFIG.name + "，" + CONFIG.title;
+  document.getElementById("video").src = CONFIG.video;
+  document.getElementById("letter").textContent = CONFIG.letter;
+  document.getElementById("sign").textContent = CONFIG.sign;
+  document.getElementById("footer").innerHTML = CONFIG.footer.replace(/\n/g, "<br>");
+
+  const secLetter = document.getElementById("sec-letter");
+  if (!CONFIG.letter.trim()) secLetter.remove();
+  const secPhotos = document.getElementById("sec-photos");
+  if (CONFIG.photos.length) {
+    const g = document.getElementById("photos");
+    CONFIG.photos.forEach(p => {
+      const im = new Image();
+      im.src = p; im.loading = "lazy";
+      im.onerror = () => im.remove();
+      g.appendChild(im);
+    });
+  } else secPhotos.remove();
+  const secTl = document.getElementById("sec-timeline");
+  if (CONFIG.timeline.length) {
+    const tl = document.getElementById("timeline");
+    CONFIG.timeline.forEach(([d, t]) => {
+      const div = document.createElement("div");
+      div.className = "t-item";
+      const date = document.createElement("div");
+      date.className = "t-date"; date.textContent = d;
+      const text = document.createElement("div");
+      text.className = "t-text"; text.textContent = t;
+      div.append(date, text); tl.appendChild(div);
+    });
+  } else secTl.remove();
+
+  confetti();
+}
+
+/* 简易彩带 */
+function confetti() {
+  const c = document.getElementById("confetti"), ctx = c.getContext("2d");
+  c.width = innerWidth; c.height = innerHeight;
+  const colors = ["#ffd166","#ef476f","#06d6a0","#118ab2","#f78c6b","#fff"];
+  const pieces = Array.from({length: 130}, () => ({
+    x: Math.random()*c.width, y: -20 - Math.random()*c.height*.5,
+    w: 6+Math.random()*6, h: 8+Math.random()*8,
+    vy: 2+Math.random()*3.2, vx: -1.4+Math.random()*2.8,
+    rot: Math.random()*Math.PI, vr: -.12+Math.random()*.24,
+    color: colors[Math.floor(Math.random()*colors.length)],
+  }));
+  const t0 = Date.now();
+  (function draw() {
+    ctx.clearRect(0,0,c.width,c.height);
+    pieces.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+    });
+    if (Date.now()-t0 < 3200) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,c.width,c.height);
+  })();
 }
 </script>
 </body>
