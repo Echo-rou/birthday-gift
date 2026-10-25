@@ -138,6 +138,13 @@
     border-radius: 999px; padding: 6px 14px; cursor: pointer;
     backdrop-filter: blur(4px);
   }
+  #replay {
+    position: fixed; top: 16px; left: 16px; z-index: 20;
+    font-size: 12px; letter-spacing: 2px; color: #ffd166;
+    background: rgba(0,0,0,.4); border: 1px solid rgba(255,209,102,.45);
+    border-radius: 999px; padding: 7px 16px; cursor: pointer;
+    backdrop-filter: blur(4px);
+  }
 
   /* ============ 结尾内容：视频 / 信 / 页脚 ============ */
   #ending { padding-top: 64px; }
@@ -196,6 +203,7 @@
   </section>
 </main>
 <canvas id="confetti"></canvas>
+<button id="replay" hidden onclick="replay()">↺ 再看一遍</button>
 <script>
 /* =====================================================================
    想改内容只动 CONFIG：
@@ -358,6 +366,7 @@ function endFlash() {
   flash.style.display = "none";
   stage.now = "black";
   const bo = document.getElementById("blackout");
+  bo.style.display = "block";
   bo.style.transition = "none"; bo.style.opacity = "1";       // 突然熄屏
   const boText = document.getElementById("boText");
   if (CONFIG.blackoutText) {
@@ -394,6 +403,18 @@ function skipStage() {
   else if (stage.now === "slow") finish();
 }
 
+/* 看完想重来：回到最开始，完整再走一遍 */
+function replay() {
+  const v = document.getElementById("video");
+  if (v) v.pause();
+  document.getElementById("ending").hidden = true;
+  document.getElementById("replay").hidden = true;
+  const ss = document.getElementById("slideshow");
+  ss.style.transition = "none"; ss.style.display = "block"; ss.style.opacity = "1";
+  window.scrollTo(0, 0);
+  startFlash();
+}
+
 /* ---------- 结尾 ---------- */
 function finish() {
   const ss = document.getElementById("slideshow");
@@ -401,6 +422,7 @@ function finish() {
   setTimeout(() => { ss.style.display = "none"; }, 900);
   const ending = document.getElementById("ending");
   ending.hidden = false;
+  document.getElementById("replay").hidden = false;
   document.getElementById("greeting").textContent = CONFIG.name + "，" + CONFIG.title;
   document.getElementById("subtitle").innerHTML = CONFIG.subtitle.replace(/\n/g, "<br>");
   document.getElementById("video").src = CONFIG.video;
