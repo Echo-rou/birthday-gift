@@ -32,7 +32,7 @@
   .hint { margin-top: 28px; font-size: 17px; letter-spacing: 2px; opacity: .85; }
   section { width: 100%; }
 
-  /* ============ 回忆幻灯：照片全屏浮现，文字飘在上面 ============ */
+  /* ============ 回忆幻灯：缓慢放映 ============ */
   #slideshow {
     position: relative; width: 100%;
     height: 100vh; height: 100dvh;
@@ -42,14 +42,14 @@
   }
   .slide {
     position: absolute; inset: 0; opacity: 0; visibility: hidden;
-    transition: opacity 1.1s ease, visibility 1.1s;
+    transition: opacity 1.4s ease, visibility 1.4s;
   }
   .slide.active { opacity: 1; visibility: visible; }
   .slide img {
     position: absolute; inset: 0; width: 100%; height: 100%;
-    object-fit: cover; opacity: 0; transition: opacity 1.1s ease;
+    object-fit: cover; opacity: 0; transition: opacity 1.4s ease;
   }
-  .slide.active img { opacity: 1; animation: kenburns 9s ease-out forwards; }
+  .slide.active img { opacity: 1; animation: kenburns 10s ease-out forwards; }
   @keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.1); } }
   .slide.nophoto {
     background:
@@ -77,9 +77,9 @@
     font-size: 15px; line-height: 1.9; opacity: .92;
     text-shadow: 0 2px 10px rgba(0,0,0,.8);
   }
-  .slide.active .m-date  { animation: rise .7s .25s ease both; }
-  .slide.active .m-title { animation: rise .7s .45s ease both; }
-  .slide.active .m-text  { animation: rise .7s .65s ease both; }
+  .slide.active .m-date  { animation: rise .9s .5s ease both; }
+  .slide.active .m-title { animation: rise .9s .75s ease both; }
+  .slide.active .m-text  { animation: rise .9s 1s ease both; }
   @keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
   #dots {
     position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
@@ -90,17 +90,50 @@
     background: rgba(255,255,255,.35); transition: all .4s;
   }
   #dots span.on { background: #ffd166; box-shadow: 0 0 8px rgba(255,209,102,.8); width: 18px; border-radius: 4px; }
-  #skip {
-    position: absolute; top: 16px; right: 16px; z-index: 3;
-    font-size: 12px; letter-spacing: 2px; color: rgba(255,255,255,.75);
-    background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.22);
-    border-radius: 999px; padding: 6px 14px; cursor: pointer;
-    backdrop-filter: blur(4px);
-  }
   #tapHint {
     position: absolute; left: 50%; bottom: 46px; transform: translateX(-50%);
     font-size: 12px; letter-spacing: 2px; color: rgba(255,255,255,.65);
     z-index: 3; transition: opacity .8s; pointer-events: none;
+  }
+
+  /* ============ 第一幕：走马灯快闪 ============ */
+  #flash {
+    position: absolute; inset: 0; z-index: 4;
+    background: #000; display: none;
+  }
+  #flash img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; opacity: 0;
+  }
+  #flash .f-cap {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; gap: 12px; opacity: 0;
+  }
+  #flash .f-date {
+    font-size: 13px; letter-spacing: 4px; color: #ffd166;
+    border: 1px solid rgba(255,209,102,.5); border-radius: 999px; padding: 4px 16px;
+  }
+  #flash .f-title { font-size: 34px; font-weight: 600; letter-spacing: 3px; }
+  #whiteflash {
+    position: absolute; inset: 0; z-index: 5; background: #fff;
+    opacity: 0; pointer-events: none;
+  }
+  /* ============ 第二幕：突然熄屏 ============ */
+  #blackout {
+    position: absolute; inset: 0; z-index: 6; background: #000;
+    opacity: 0; pointer-events: none;
+  }
+  #blackout .bo-text {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; letter-spacing: 6px; color: rgba(255,255,255,.8);
+    opacity: 0; transition: opacity 1.2s ease;
+  }
+  #skip {
+    position: absolute; top: 16px; right: 16px; z-index: 7;
+    font-size: 12px; letter-spacing: 2px; color: rgba(255,255,255,.75);
+    background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.22);
+    border-radius: 999px; padding: 6px 14px; cursor: pointer;
+    backdrop-filter: blur(4px);
   }
 
   /* ============ 结尾内容：视频 / 信 / 页脚 ============ */
@@ -136,7 +169,10 @@
   <section id="gift" hidden>
     <div id="slideshow">
       <div id="slides"></div>
-      <button id="skip" onclick="event.stopPropagation();finish()">跳过 ↓</button>
+      <div id="flash"></div>
+      <div id="whiteflash"></div>
+      <div id="blackout"><div class="bo-text" id="boText"></div></div>
+      <button id="skip" onclick="event.stopPropagation();skipStage()">跳过 ↓</button>
       <div id="dots"></div>
       <div id="tapHint">轻触屏幕 · 翻看下一张回忆</div>
     </div>
@@ -160,10 +196,9 @@
 <script>
 /* =====================================================================
    想改内容只动 CONFIG：
-   · memories = 回忆幻灯，一张照片一屏。photo 填 "photos/1.jpg"，
-     照片文件传到本仓库 photos/ 文件夹；photo 留空 "" 也能放映
-     （显示为星空渐变底），照片到了再填文件名。
-   · 看完最后一张自动落到视频和信。video 填 "" 可隐藏视频板块。
+   · memories = 缓慢放映的一屏一照片；photo 填 "photos/1.jpg"。
+   · flashExtra = 只在开场快闪（走马灯）里出现的照片，可放很多张。
+   · 节奏参数在下面"开场节奏"处：快闪每张毫秒数、黑屏停留时长。
    · 想让网页跳转别的网址：把 CONFIG 整段换成
        location.replace("https://新网址");
    ===================================================================== */
@@ -179,6 +214,8 @@ const CONFIG = {
     { photo: "", date: "这几年", title: "我们的合照", text: "挑一张你们俩的合影，写一句只有你们懂的话。" },
     { photo: "", date: "三十岁", title: "新的开始", text: "最后一张照片，写给三十岁的她：往后都是坦途，生日快乐。" },
   ],
+  flashExtra: [],
+  blackoutText: "别急 · 我们把时光慢慢放一遍",
   videoHeading: "今 年 的 这 一 章",
   video: "video.mp4",
   letter: [
@@ -188,6 +225,13 @@ const CONFIG = {
   sign: "—— 永远爱你的弟弟",
   footer: "这个网址每年都会更新新的故事\n这张卡片，永远不会过期",
 };
+
+/* ---------- 开场节奏（毫秒），想快想慢改这里 ---------- */
+const FLASH_MS = 160;        // 走马灯：第一遍每张停留
+const FLASH2_MS = 240;       // 走马灯：第二遍每张停留
+const WHITE_MS = 90;         // 两遍之间的白闪
+const BLACK_HOLD = 1800;     // 熄屏后黑屏停留
+const BLACK_FADE = 2000;     // 黑屏淡出回到第一张
 
 /* ---------- 以下是页面逻辑，一般不用动 ---------- */
 for (let i = 0; i < 70; i++) {
@@ -200,13 +244,15 @@ for (let i = 0; i < 70; i++) {
   document.body.appendChild(s);
 }
 
-let cur = 0, total = 0;
+const stage = { now: "cover" };   // cover | flash | black | slow
+let cur = 0, total = 0, timers = [];
 
 function openGift() {
   document.getElementById("cover").hidden = true;
   document.getElementById("gift").hidden = false;
   buildSlides();
   confetti();
+  startFlash();
 }
 
 function buildSlides() {
@@ -231,7 +277,6 @@ function buildSlides() {
     dots.appendChild(document.createElement("span"));
   });
   total = CONFIG.memories.length;
-  show(0);
 
   const ss = document.getElementById("slideshow");
   let downX = null;
@@ -239,9 +284,92 @@ function buildSlides() {
   ss.addEventListener("pointerup", e => {
     if (downX === null) return;
     const dx = e.clientX - downX; downX = null;
+    if (stage.now === "flash") { endFlash(); return; }
+    if (stage.now !== "slow") return;
     if (dx > 50) prev();
-    else if (dx < -50 || Math.abs(dx) <= 50) next();
+    else next();
   });
+}
+
+/* ---------- 第一幕：走马灯快闪 ---------- */
+function startFlash() {
+  stage.now = "flash";
+  const flash = document.getElementById("flash");
+  flash.style.display = "block";
+  const frames = [];
+  const seen = new Set();
+  const use = p => { if (p && !seen.has(p)) { seen.add(p); frames.push(p); } };
+  CONFIG.memories.forEach(m => use(m.photo));
+  (CONFIG.flashExtra || []).forEach(use);
+
+  if (!frames.length) {           // 还没有照片：直接黑屏转慢放
+    endFlash(); return;
+  }
+
+  // 生成快闪帧：有照片用照片，没有照片的 memories 用文字帧兜底
+  flash.innerHTML = "";
+  const seq = [];
+  CONFIG.memories.forEach(m => {
+    seq.push({ photo: m.photo, date: m.date, title: m.title });
+  });
+
+  seq.forEach((f, idx) => {
+    let el;
+    if (f.photo && seen.has(f.photo)) {
+      el = new Image();
+      el.src = f.photo; el.draggable = false;
+      el.onerror = () => { el.remove(); };
+    } else {
+      el = document.createElement("div");
+      el.className = "f-cap";
+      el.innerHTML = `<div class="f-date"></div><div class="f-title"></div>`;
+      el.querySelector(".f-date").textContent = f.date;
+      el.querySelector(".f-title").textContent = f.title;
+    }
+    flash.appendChild(el);
+  });
+
+  const els = Array.from(flash.children);
+  const pass = (ms, done) => {
+    els.forEach((el, i) => {
+      timers.push(setTimeout(() => {
+        els.forEach(x => x.style.opacity = "0");
+        el.style.opacity = "1";
+      }, i * ms));
+    });
+    timers.push(setTimeout(done, els.length * ms));
+  };
+  pass(FLASH_MS, () => {
+    const wf = document.getElementById("whiteflash");
+    wf.style.transition = "none"; wf.style.opacity = "0.92";
+    timers.push(setTimeout(() => {
+      wf.style.transition = "opacity .25s"; wf.style.opacity = "0";
+    }, WHITE_MS));
+    pass(FLASH2_MS, () => endFlash());
+  });
+}
+
+/* ---------- 第二幕：突然熄屏 → 第三幕：缓慢放映 ---------- */
+function endFlash() {
+  timers.forEach(clearTimeout); timers = [];
+  const flash = document.getElementById("flash");
+  flash.style.display = "none";
+  stage.now = "black";
+  const bo = document.getElementById("blackout");
+  bo.style.transition = "none"; bo.style.opacity = "1";       // 突然熄屏
+  const boText = document.getElementById("boText");
+  if (CONFIG.blackoutText) {
+    boText.textContent = CONFIG.blackoutText;
+    timers.push(setTimeout(() => boText.style.opacity = "1", 500));
+    timers.push(setTimeout(() => boText.style.opacity = "0", BLACK_HOLD - 400));
+  }
+  timers.push(setTimeout(() => {
+    show(0);                                                   // 回到第一张
+    bo.style.transition = `opacity ${BLACK_FADE}ms ease`;      // 缓慢淡入放映
+    bo.style.opacity = "0";
+    stage.now = "slow";
+    timers.push(setTimeout(() => { bo.style.display = "none"; }, BLACK_FADE + 200));
+  }, BLACK_HOLD));
 }
 
 function show(i) {
@@ -259,7 +387,12 @@ function next() {
 function prev() {
   if (cur > 0) show(cur - 1);
 }
+function skipStage() {
+  if (stage.now === "flash" || stage.now === "black") endFlash();
+  else if (stage.now === "slow") finish();
+}
 
+/* ---------- 结尾 ---------- */
 function finish() {
   const ss = document.getElementById("slideshow");
   ss.style.transition = "opacity .9s"; ss.style.opacity = "0";
