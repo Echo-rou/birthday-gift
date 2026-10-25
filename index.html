@@ -257,6 +257,7 @@ for (let i = 0; i < 70; i++) {
 
 const stage = { now: "cover" };   // cover | flash | black | slow
 let cur = 0, total = 0, timers = [];
+let flashK = 0, flashLen = 0, flashManual = false, autoTimer = null;
 
 function openGift() {
   document.getElementById("cover").hidden = true;
@@ -295,7 +296,13 @@ function buildSlides() {
   ss.addEventListener("pointerup", e => {
     if (downX === null) return;
     const dx = e.clientX - downX; downX = null;
-    if (stage.now === "flash") { endFlash(); return; }
+    if (stage.now === "flash") {           // 快闪阶段：也可手动左右滑一帧帧看
+      flashManual = true; clearTimeout(autoTimer);
+      if (dx > 50) flashGoto(Math.max(0, flashK - 1));
+      else flashGoto(flashK + 1);
+      return;
+    }
+    if (stage.now === "black") { proceedSlow(); return; }   // 熄屏：轻触直接进慢放
     if (stage.now !== "slow") return;
     if (dx > 50) prev();
     else next();
@@ -339,28 +346,44 @@ function startFlash() {
     flash.appendChild(frame);
   });
 
-  const els = Array.from(flash.children);
-  const pass = (ms, done) => {
-    els.forEach((el, i) => {
-      timers.push(setTimeout(() => {
-        els.forEach(x => x.style.opacity = "0");
-        el.style.opacity = "1";
-      }, i * ms));
-    });
-    timers.push(setTimeout(done, els.length * ms));
-  };
-  pass(FLASH_MS, () => {
-    const wf = document.getElementById("whiteflash");
+  flashLen = seq.length;
+  flashK = 0; flashManual = false;
+  flashGoto(0);
+}
+
+/* 快闪虚拟时间轴：0..n-1 第一轮 → n 白闪 → n+1..2n 第二轮 → 结束进熄屏
+   自动播放由 autoTimer 驱动；一旦手动滑动就接管（flashManual=true） */
+function showFlashFrame(idx) {
+  document.querySelectorAll("#flash .f-frame").forEach((x, i) =>
+    x.style.opacity = i === idx ? "1" : "0");
+}
+
+function flashGoto(k) {
+  clearTimeout(autoTimer);
+  const wf = document.getElementById("whiteflash");
+  const n = flashLen;
+  if (k >= 2 * n + 1) { endFlash(); return; }
+  flashK = k;
+  if (k === n) {                                  // 两轮之间的白闪
+    showFlashFrame(-1);
     wf.style.transition = "none"; wf.style.opacity = "0.92";
-    timers.push(setTimeout(() => {
+    if (!flashManual) autoTimer = setTimeout(() => {
       wf.style.transition = "opacity .25s"; wf.style.opacity = "0";
-    }, WHITE_MS));
-    pass(FLASH2_MS, () => endFlash());
-  });
+      flashGoto(k + 1);
+    }, WHITE_MS + 200);
+    return;
+  }
+  if (k === n + 1) { wf.style.transition = "opacity .25s"; wf.style.opacity = "0"; }
+  showFlashFrame(k < n ? k : k - n - 1);
+  if (!flashManual) {
+    const ms = k < n ? FLASH_MS : FLASH2_MS;
+    autoTimer = setTimeout(() => flashGoto(k + 1), ms);
+  }
 }
 
 /* ---------- 第二幕：突然熄屏 → 第三幕：缓慢放映 ---------- */
 function endFlash() {
+  clearTimeout(autoTimer);
   timers.forEach(clearTimeout); timers = [];
   const flash = document.getElementById("flash");
   flash.style.display = "none";
@@ -371,16 +394,23 @@ function endFlash() {
   const boText = document.getElementById("boText");
   if (CONFIG.blackoutText) {
     boText.textContent = CONFIG.blackoutText;
-    timers.push(setTimeout(() => boText.style.opacity = "1", 500));
-    timers.push(setTimeout(() => boText.style.opacity = "0", BLACK_HOLD - 400));
+    timers.push(setTimeout(() => boText.style.opacity = "1", 400));
+    timers.push(setTimeout(() => boText.style.opacity = "0", BLACK_HOLD - 500));
   }
-  timers.push(setTimeout(() => {
-    show(0);                                                   // 回到第一张
-    bo.style.transition = `opacity ${BLACK_FADE}ms ease`;      // 缓慢淡入放映
-    bo.style.opacity = "0";
-    stage.now = "slow";
-    timers.push(setTimeout(() => { bo.style.display = "none"; }, BLACK_FADE + 200));
-  }, BLACK_HOLD));
+  timers.push(setTimeout(proceedSlow, BLACK_HOLD));
+}
+
+/* 熄屏后进入缓慢放映（熄屏时轻触屏幕可提前进入） */
+function proceedSlow() {
+  clearTimeout(autoTimer);
+  timers.forEach(clearTimeout); timers = [];
+  const bo = document.getElementById("blackout");
+  document.getElementById("boText").style.opacity = "0";
+  show(0);                                                    // 回到第一张
+  bo.style.transition = `opacity ${BLACK_FADE}ms ease`;       // 缓慢淡入放映
+  bo.style.opacity = "0";
+  stage.now = "slow";
+  setTimeout(() => { bo.style.display = "none"; }, BLACK_FADE + 200);
 }
 
 function show(i) {
