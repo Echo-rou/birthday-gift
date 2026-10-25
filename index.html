@@ -101,13 +101,16 @@
     position: absolute; inset: 0; z-index: 4;
     background: #000; display: none;
   }
-  #flash img {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    object-fit: cover; opacity: 0;
+  #flash .f-frame {
+    position: absolute; inset: 0; opacity: 0; overflow: hidden;
   }
-  #flash .f-cap {
-    position: absolute; inset: 0; display: flex; flex-direction: column;
-    justify-content: center; align-items: center; gap: 12px; opacity: 0;
+  #flash .f-frame img { width: 100%; height: 100%; object-fit: cover; }
+  #flash .f-frame.nophoto {
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    gap: 12px;
+    background:
+      radial-gradient(circle at 70% 20%, rgba(255,209,102,.12), transparent 45%),
+      linear-gradient(155deg, #3a2f63 0%, #232a4d 55%, #1a2238 100%);
   }
   #flash .f-date {
     font-size: 13px; letter-spacing: 4px; color: #ffd166;
@@ -296,37 +299,36 @@ function startFlash() {
   stage.now = "flash";
   const flash = document.getElementById("flash");
   flash.style.display = "block";
-  const frames = [];
-  const seen = new Set();
-  const use = p => { if (p && !seen.has(p)) { seen.add(p); frames.push(p); } };
-  CONFIG.memories.forEach(m => use(m.photo));
-  (CONFIG.flashExtra || []).forEach(use);
-
-  if (!frames.length) {           // 还没有照片：直接黑屏转慢放
-    endFlash(); return;
-  }
-
-  // 生成快闪帧：有照片用照片，没有照片的 memories 用文字帧兜底
   flash.innerHTML = "";
-  const seq = [];
-  CONFIG.memories.forEach(m => {
-    seq.push({ photo: m.photo, date: m.date, title: m.title });
-  });
 
-  seq.forEach((f, idx) => {
-    let el;
-    if (f.photo && seen.has(f.photo)) {
-      el = new Image();
-      el.src = f.photo; el.draggable = false;
-      el.onerror = () => { el.remove(); };
+  // 快闪帧：memories 每条一帧（flashExtra 的照片附加在后面）。
+  // 没照片的条目用"年份+标题"文字帧兜底，照片到位后自动变成真照片。
+  const seq = CONFIG.memories.map(m => ({ photo: m.photo, date: m.date, title: m.title }));
+  (CONFIG.flashExtra || []).forEach(p => seq.push({ photo: p, date: "", title: "" }));
+
+  seq.forEach(f => {
+    const frame = document.createElement("div");
+    frame.className = "f-frame";
+    if (f.photo) {
+      const im = new Image();
+      im.src = f.photo; im.draggable = false;
+      im.onerror = () => {
+        frame.classList.add("nophoto");
+        im.remove();
+        const d = document.createElement("div"); d.className = "f-date";
+        const t = document.createElement("div"); t.className = "f-title";
+        d.textContent = f.date; t.textContent = f.title;
+        frame.append(d, t);
+      };
+      frame.appendChild(im);
     } else {
-      el = document.createElement("div");
-      el.className = "f-cap";
-      el.innerHTML = `<div class="f-date"></div><div class="f-title"></div>`;
-      el.querySelector(".f-date").textContent = f.date;
-      el.querySelector(".f-title").textContent = f.title;
+      frame.classList.add("nophoto");
+      const d = document.createElement("div"); d.className = "f-date";
+      const t = document.createElement("div"); t.className = "f-title";
+      d.textContent = f.date; t.textContent = f.title;
+      frame.append(d, t);
     }
-    flash.appendChild(el);
+    flash.appendChild(frame);
   });
 
   const els = Array.from(flash.children);
