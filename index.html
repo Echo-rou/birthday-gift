@@ -46,12 +46,10 @@
   }
   .vinner { max-width: 560px; width: 100%; padding: 0 24px; position: relative; z-index: 2; }
 
-  /* 熄屏黑卡（回到起点的那一屏） */
   #opening { background: #000; }
   #opening .bo-text { font-size: 14px; letter-spacing: 6px; color: rgba(255,255,255,.8); }
   #opening .bo-sub { margin-top: 18px; font-size: 12px; letter-spacing: 3px; color: rgba(255,255,255,.35); }
 
-  /* 问候卡 */
   #greetcard {
     background:
       radial-gradient(circle at 20% 15%, rgba(255,209,102,.10), transparent 45%),
@@ -63,7 +61,6 @@
     font-size: 12px; letter-spacing: 2px; color: rgba(255,255,255,.45); animation: cueup 2s ease-in-out infinite; }
   @keyframes cueup { 0%,100% { transform: translate(-50%,0); opacity:.45 } 50% { transform: translate(-50%,-8px); opacity:.9 } }
 
-  /* 照片卡：文字飘在照片上 */
   .vphoto { background: #000; }
   .vphoto img.bg {
     position: absolute; inset: 0; width: 100%; height: 100%;
@@ -99,7 +96,6 @@
   .vphoto.inview .m-text  { animation: rise .9s .55s ease both; }
   @keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* 视频卡 */
   #videoblock {
     background:
       radial-gradient(circle at 80% 80%, rgba(255,209,102,.10), transparent 45%),
@@ -116,7 +112,6 @@
     background: #000; outline: none;
   }
 
-  /* 信 */
   #letterwrap { padding: 80px 24px 90px; }
   #letterwrap .letter {
     max-width: 560px; margin: 0 auto;
@@ -127,49 +122,28 @@
   .sign { margin-top: 18px; text-align: right; font-size: 14px; opacity: .6; }
   #footer { max-width: 560px; margin: 48px auto 0; font-size: 13px; opacity: .5; letter-spacing: 1px; line-height: 2; }
 
-  /* ============ 走马灯快闪覆盖层 ============ */
-  #flashwrap {
+  /* ============ 开场视频全屏覆盖层 ============ */
+  #videowrap {
     position: fixed; inset: 0; z-index: 80; background: #000;
-    cursor: pointer; user-select: none; -webkit-user-select: none;
+    user-select: none; -webkit-user-select: none;
   }
-  #flashwrap[hidden] { display: none; }
-  #flashwrap .f-frame { position: absolute; inset: 0; opacity: 0; overflow: hidden; }
-  #flashwrap .f-frame img { width: 100%; height: 100%; object-fit: cover; }
-  #flashwrap .f-frame.nophoto {
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
-    gap: 12px;
-    background:
-      radial-gradient(circle at 70% 20%, rgba(255,209,102,.12), transparent 45%),
-      linear-gradient(155deg, #3a2f63 0%, #232a4d 55%, #1a2238 100%);
+  #videowrap[hidden] { display: none; }
+  #openingVideo {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; background: #000;
   }
-  #flashwrap .f-date {
-    font-size: 13px; letter-spacing: 4px; color: #ffd166;
-    border: 1px solid rgba(255,209,102,.5); border-radius: 999px; padding: 4px 16px;
-  }
-  #flashwrap .f-title { font-size: 34px; font-weight: 600; letter-spacing: 3px; }
-  #whiteflash {
-    position: absolute; inset: 0; background: #fff;
-    opacity: 0; pointer-events: none;
-  }
-  #flashSkip {
+  #videoSkip {
     position: absolute; top: 16px; right: 16px;
-    font-size: 12px; letter-spacing: 2px; color: rgba(255,255,255,.75);
-    background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.22);
+    font-size: 12px; letter-spacing: 2px; color: rgba(255,255,255,.8);
+    background: rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,.25);
     border-radius: 999px; padding: 6px 14px; cursor: pointer;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px); z-index: 2;
   }
   #replay {
     position: fixed; top: 16px; left: 16px; z-index: 85;
     font-size: 12px; letter-spacing: 2px; color: #ffd166;
     background: rgba(0,0,0,.4); border: 1px solid rgba(255,209,102,.45);
     border-radius: 999px; padding: 7px 16px; cursor: pointer;
-    backdrop-filter: blur(4px);
-  }
-  #musicBtn {
-    position: fixed; top: 16px; right: 16px; z-index: 85;
-    font-size: 12px; letter-spacing: 2px; color: rgba(255,255,255,.85);
-    background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.25);
-    border-radius: 999px; padding: 7px 14px; cursor: pointer;
     backdrop-filter: blur(4px);
   }
 </style>
@@ -213,26 +187,22 @@
   </section>
 </div>
 
-<div id="flashwrap" hidden onclick="skipFlash()">
-  <div id="flashFrames"></div>
-  <div id="whiteflash"></div>
-  <button id="flashSkip" onclick="event.stopPropagation();skipFlash()">跳过 ↓</button>
+<div id="videowrap" hidden>
+  <video id="openingVideo" src="opening.mp4" playsinline preload="auto"></video>
+  <button id="videoSkip" onclick="event.stopPropagation();skipOpening()">跳过 ↓</button>
 </div>
 
 <canvas id="confetti"></canvas>
 <button id="replay" hidden onclick="replay()">↺ 再看一遍</button>
-<audio id="bgm" src="bgm.mp3" preload="auto" loop></audio>
-<button id="musicBtn" hidden onclick="toggleMusic(event)">♪ 开</button>
 
 <script>
 /* =====================================================================
+   开场：🎁 点开 → 全屏播放剪映剪好的卡点视频（opening.mp4）
+         → 放完自动熄屏 → 进入可上下滑的故事流（照片+文字飘浮）
    想改内容只动 CONFIG：
-   · memories：一屏一张照片 + 你的话（文字飘在照片上）。
-     photo 填 "photos/1.jpg"，照片传到本仓库 photos/ 文件夹；
-     没照片先留 ""，会显示星空渐变底。
-   · flashExtra：只在开场快闪里一扫而过的照片（可放很多张）。
-   · 整个故事是一条竖向流：往下滑进入下一环节，
-     任何地方向上滑，都能直接回到上一个部分。
+   · memories：一屏一张照片 + 你的话。photo 填 "photos/1.jpg"，
+     照片传到本仓库 photos/ 文件夹；没照片先留 ""。
+   · video：故事中段「今年的这一章」的小视频。
    · 想让网页跳转别的网址：把 CONFIG 整段换成
        location.replace("https://新网址");
    ===================================================================== */
@@ -240,6 +210,7 @@ const CONFIG = {
   name: "亲爱的姐姐",
   title: "三十岁生日快乐！",
   subtitle: "三十而已，未来可期",
+  openingVideo: "opening.mp4",   // 剪映导出的开场卡点视频
   memories: [
     { photo: "", date: "1996", title: "她来啦", text: "出生那年的小故事写在这里——第一次见到这个小家伙的人，都说她将来一定不得了。" },
     { photo: "", date: "年份", title: "小小少年", text: "童年的一张照片配一句话：那时候的她，最爱做的事情是什么？" },
@@ -248,16 +219,6 @@ const CONFIG = {
     { photo: "", date: "这几年", title: "我们的合照", text: "挑一张你们俩的合影，写一句只有你们懂的话。" },
     { photo: "", date: "三十岁", title: "新的开始", text: "最后一张照片，写给三十岁的她：往后都是坦途，生日快乐。" },
   ],
-  flashExtra: [],
-  /* 快闪卡点：照片按时间从旧到新排列；bgm.mp3 放进仓库即自动配乐同步 */
-  montageOrder: [
-    "photos/f01.jpg", "photos/p02.jpg", "photos/f02.jpg", "photos/f03.jpg",
-    "photos/p01.jpg", "photos/p03.jpg", "photos/f08.jpg", "photos/f09.jpg",
-    "photos/f04.jpg", "photos/f07.jpg", "photos/p07.jpg", "photos/p08.jpg",
-    "photos/f10.jpg", "photos/f12.jpg", "photos/p04.jpg", "photos/p05.jpg",
-    "photos/f11.jpg", "photos/p09.jpg", "photos/f06.jpg", "photos/p10.jpg",
-  ],
-  holdPhoto: "photos/p06.jpg",   // 高潮白闪后定格的那张（仙女棒回眸）
   videoHeading: "今 年 的 这 一 章",
   video: "video.mp4",
   letter: [
@@ -267,12 +228,6 @@ const CONFIG = {
   sign: "—— 永远爱你的弟弟",
   footer: "这个网址每年都会更新新的故事\n这张卡片，永远不会过期",
 };
-
-/* ---------- 开场快闪节奏：午夜巡航式卡点 ----------
-   结构：前奏每2拍1张 → 鼓点每拍1张 → 高潮每半拍1张 → 白闪 → 定格王牌照 → 熄屏
-   bgm.mp3 放进仓库后会与画面同时起播；没有音乐就按 BPM 静默节拍走 */
-const MONTAGE_BPM = 150;   // 拿到 bgm 后按歌的实际 BPM 微调
-const BLACK_HOLD = 1600;   // 快闪结束、熄屏停留
 
 /* ---------- 页面逻辑 ---------- */
 for (let i = 0; i < 70; i++) {
@@ -285,9 +240,6 @@ for (let i = 0; i < 70; i++) {
   document.body.appendChild(s);
 }
 
-let flashTimer = null;
-const timers = [];
-
 function openGift() {
   document.getElementById("cover").style.display = "none";
   const story = document.getElementById("story");
@@ -295,18 +247,8 @@ function openGift() {
   buildStory();
   window.scrollTo(0, 0);
   document.getElementById("replay").hidden = false;
-  document.getElementById("musicBtn").hidden = false;
   confetti();
-  playFlash();
-}
-
-/* 背景音乐开关 */
-function toggleMusic(e) {
-  e.stopPropagation();
-  const bgm = document.getElementById("bgm");
-  if (!bgm) return;
-  bgm.muted = !bgm.muted;
-  document.getElementById("musicBtn").textContent = bgm.muted ? "♪ 关" : "♪ 开";
+  playOpening();
 }
 
 function buildStory() {
@@ -320,8 +262,6 @@ function buildStory() {
   if (CONFIG.videoHeading) vh.textContent = CONFIG.videoHeading; else vh.remove();
   if (!CONFIG.video) document.getElementById("videoblock").remove();
 
-  /* 注入照片卡 */
-  const greet = document.getElementById("greetcard");
   CONFIG.memories.forEach(m => {
     const sec = document.createElement("section");
     sec.className = "vblock vphoto" + (m.photo ? "" : " nophoto");
@@ -339,119 +279,46 @@ function buildStory() {
     const t = document.createElement("div"); t.className = "m-title"; t.textContent = m.title;
     const x = document.createElement("div"); x.className = "m-text"; x.textContent = m.text;
     capin.append(d, t, x); cap.appendChild(capin); sec.appendChild(cap);
-    greet.after(sec);
+    document.getElementById("greetcard").after(sec);
   });
 
-  /* 滚动到哪一屏，哪一屏的文字浮现、照片镜头推近 */
   const io = new IntersectionObserver(entries => {
     entries.forEach(e => e.target.classList.toggle("inview", e.isIntersecting));
   }, { threshold: 0.35 });
   document.querySelectorAll(".vphoto").forEach(el => io.observe(el));
 }
 
-/* ---------- 走马灯快闪（覆盖层）：卡点引擎，自动播，轻触可跳过 ---------- */
-function playFlash() {
-  clearTimeout(flashTimer);
-  const fw = document.getElementById("flashwrap");
-  const box = document.getElementById("flashFrames");
-  box.innerHTML = "";
-  const pool = (CONFIG.montageOrder && CONFIG.montageOrder.length)
-    ? CONFIG.montageOrder.slice()
-    : CONFIG.memories.map(m => m.photo).filter(Boolean).concat(CONFIG.flashExtra || []);
-  if (!pool.length) { fw.hidden = true; return; }
-
-  const seq = pool.map(p => ({ photo: p, date: "", title: "" }));
-  seq.forEach(f => {
-    const frame = document.createElement("div");
-    frame.className = "f-frame" + (f.photo ? "" : " nophoto");
-    if (f.photo) {
-      const im = new Image();
-      im.src = f.photo; im.draggable = false;
-      im.onerror = () => {
-        frame.classList.add("nophoto"); im.remove();
-        if (!frame.children.length) {
-          const t = document.createElement("div"); t.className = "f-title"; t.textContent = "♪";
-          frame.appendChild(t);
-        }
-      };
-      frame.appendChild(im);
-    } else {
-      const d = document.createElement("div"); d.className = "f-date"; d.textContent = f.date;
-      const t = document.createElement("div"); t.className = "f-title"; t.textContent = f.title;
-      frame.append(d, t);
-    }
-    box.appendChild(frame);
-  });
-  /* 定格帧：高潮白闪后停留的王牌照 */
-  if (CONFIG.holdPhoto) {
-    const frame = document.createElement("div");
-    frame.className = "f-frame";
-    const im = new Image();
-    im.src = CONFIG.holdPhoto; im.draggable = false;
-    im.onerror = () => { frame.classList.add("nophoto"); im.remove(); };
-    frame.appendChild(im);
-    box.appendChild(frame);
-  }
-
-  fw.hidden = false;
-  const frames = Array.from(box.children);
-  const show = k => frames.forEach((x, i) => x.style.opacity = i === k ? "1" : "0");
-  const wf = document.getElementById("whiteflash");
-  const beat = 60000 / MONTAGE_BPM;
-  const nBurst = frames.length - (CONFIG.holdPhoto ? 1 : 0);
-  let t = 0, idx = 0;
-
-  for (let i = 0; i < 4 && idx < nBurst; i++) {          // 前奏：每2拍1张
-    timers.push(setTimeout(() => show(idx), Math.round(t)));
-    t += beat * 2; idx++;
-  }
-  while (idx < nBurst - 4) {                              // 鼓点：每拍1张
-    timers.push(setTimeout(() => show(idx), Math.round(t)));
-    t += beat; idx++;
-  }
-  while (idx < frames.length) {                           // 高潮：每半拍1张
-    timers.push(setTimeout(() => show(idx), Math.round(t)));
-    t += beat * 0.5; idx++;
-  }
-  timers.push(setTimeout(() => {                          // 白闪
-    wf.style.transition = "none"; wf.style.opacity = "0.92";
-  }, Math.round(t)));
-  t += beat;
-  timers.push(setTimeout(() => {                          // 定格王牌照
-    wf.style.transition = "opacity .25s"; wf.style.opacity = "0";
-    show(frames.length - 1);
-  }, Math.round(t)));
-  t += beat * 4;
-  timers.push(setTimeout(endFlash, Math.round(t)));
-
-  /* 音乐与画面同时起播；没有 bgm.mp3 时静默按节拍走 */
-  const bgm = document.getElementById("bgm");
-  if (bgm) { bgm.currentTime = 0; bgm.play().catch(() => {}); }
+/* ---------- 开场视频：全屏放映，放完自动熄屏进故事 ---------- */
+function playOpening() {
+  const wrap = document.getElementById("videowrap");
+  const v = document.getElementById("openingVideo");
+  wrap.hidden = false;
+  wrap.style.opacity = "1"; wrap.style.transition = "none";
+  v.currentTime = 0;
+  v.onended = endOpening;
+  v.onerror = () => endOpening();   // 还没上传视频时直接进故事
+  v.play().catch(() => endOpening());
 }
 
-/* 突然熄屏 → 停留 → 化开回到故事顶部 */
-function endFlash() {
-  clearTimeout(flashTimer);
-  timers.forEach(clearTimeout); timers.length = 0;
-  const fw = document.getElementById("flashwrap");
-  const skip = document.getElementById("flashSkip");
-  skip.style.display = "none";
+function skipOpening() { endOpening(); }
+
+function endOpening() {
+  const wrap = document.getElementById("videowrap");
+  const v = document.getElementById("openingVideo");
+  if (wrap.hidden) return;
+  if (v) { v.onended = null; v.pause(); }
   window.scrollTo(0, 0);                    // 回到起点（熄屏黑卡）
-  flashTimer = setTimeout(() => {
-    fw.style.transition = `opacity 1.6s ease`;
-    fw.style.opacity = "0";                 // 黑幕缓缓化开，露出故事
-    setTimeout(() => { fw.hidden = true; fw.style.opacity = "1"; skip.style.display = "block"; }, 1700);
-  }, BLACK_HOLD);
+  wrap.style.transition = "opacity 1.6s ease";
+  wrap.style.opacity = "0";                 // 黑幕缓缓化开，露出故事
+  setTimeout(() => { wrap.hidden = true; }, 1700);
 }
-
-function skipFlash() { endFlash(); }
 
 /* 看完想重来：回到最开始，完整再走一遍 */
 function replay() {
   const v = document.getElementById("video");
   if (v) v.pause();
   window.scrollTo({ top: 0, behavior: "auto" });
-  playFlash();
+  playOpening();
 }
 
 /* 简易彩带 */
