@@ -1,0 +1,167 @@
+{
+  "network": "1.6 Mbps download, 150 ms latency; local origin, cold cache",
+  "checks": [
+    "12 chapters display in CONFIG order at mobile size; no horizontal overflow",
+    "story video requests only after play and plays successfully",
+    "repeated open/replay preserves 12 chapters; missing opening exits promptly",
+    "failed photo keeps caption/preview and reloads after online event",
+    "JPEG fallback, desktop blurred background, reduced motion and bounded requests",
+    "stalled opening exits within 8-second watchdog",
+    "hung photo requests release slots after 12 seconds; fast jump recovers"
+  ],
+  "before": {
+    "cover_response_ms": 1468,
+    "initial_requests": [
+      "/before.html",
+      "/assets/cover.jpg",
+      "/assets/video-poster.jpg"
+    ],
+    "requests_after_opening": [
+      "/before.html",
+      "/assets/cover.jpg",
+      "/assets/video-poster.jpg",
+      "/opening.mp4",
+      "/photos/021.jpg",
+      "/photos/027.jpg",
+      "/photos/077.jpg",
+      "/photos/076.jpg",
+      "/photos/171.jpg",
+      "/photos/110.jpg",
+      "/photos/115.jpg",
+      "/photos/114.jpg",
+      "/photos/122.jpg",
+      "/photos/145.jpg",
+      "/photos/155.jpg",
+      "/photos/165.jpg",
+      "/video.mp4"
+    ],
+    "snapshot": {
+      "chapters": 12,
+      "images": [
+        {
+          "src": "photos/021.jpg",
+          "ready": true
+        },
+        {
+          "src": "photos/027.jpg",
+          "ready": false
+        },
+        {
+          "src": "photos/077.jpg",
+          "ready": false
+        },
+        {
+          "src": "photos/076.jpg",
+          "ready": true
+        },
+        {
+          "src": "photos/171.jpg",
+          "ready": false
+        },
+        {
+          "src": "photos/110.jpg",
+          "ready": false
+        },
+        {
+          "src": "photos/115.jpg",
+          "ready": false
+        },
+        {
+          "src": "photos/114.jpg",
+          "ready": false
+        },
+        {
+          "src": "photos/122.jpg",
+          "ready": false
+        },
+        {
+          "src": "photos/145.jpg",
+          "ready": false
+        },
+        {
+          "src": "photos/155.jpg",
+          "ready": false
+        },
+        {
+          "src": "photos/165.jpg",
+          "ready": false
+        }
+      ],
+      "bytes": 343980,
+      "overlay": false,
+      "overflow": false
+    },
+    "javascript_errors": []
+  },
+  "after": {
+    "cover_response_ms": 980,
+    "initial_requests": [
+      "/",
+      "/assets/cover.webp",
+      "/photos/021.webp"
+    ],
+    "requests_after_opening": [
+      "/",
+      "/assets/cover.webp",
+      "/photos/021.webp",
+      "/photos/027.webp"
+    ],
+    "snapshot": {
+      "chapters": 12,
+      "images": [
+        {
+          "src": "photos/021.webp",
+          "ready": true
+        },
+        {
+          "src": "photos/027.webp",
+          "ready": true
+        },
+        {
+          "src": null,
+          "ready": false
+        },
+        {
+          "src": null,
+          "ready": false
+        },
+        {
+          "src": null,
+          "ready": false
+        },
+        {
+          "src": null,
+          "ready": false
+        },
+        {
+          "src": null,
+          "ready": false
+        },
+        {
+          "src": null,
+          "ready": false
+        },
+        {
+          "src": null,
+          "ready": false
+        },
+        {
+          "src": null,
+          "ready": false
+        },
+        {
+          "src": null,
+          "ready": false
+        },
+        {
+          "src": null,
+          "ready": false
+        }
+      ],
+      "bytes": 233624,
+      "overlay": false,
+      "overflow": false
+    },
+    "javascript_errors": []
+  }
+}

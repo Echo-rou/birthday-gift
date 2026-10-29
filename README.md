@@ -1,26 +1,40 @@
-# 生日礼物网页 · 部署与修改说明
+# 生日网站 · 加载优化版
 
-网址原理：二维码和 NFC 里只写一个**永远不变**的网址，内容都在这个网页里，以后随时改。
+基于提交 `07592c86004549c53985d576248b61b17ade5e80`，保留原来的12张照片、排版、文案和视频。本版本用于发布到现有 GitHub Pages，部署状态以仓库 Actions 和线上页面为准。详细进展见 [当前报告4](docs/当前报告4.md)。
 
-## 首次上线（GitHub Pages，约 10 分钟）
+## 预览
 
-1. 注册/登录 [github.com](https://github.com)，右上角 `+` → `New repository`，
-   名字填 `birthday-gift`，选 **Public**，创建。
-2. 进入仓库页面 → `Add file` → `Upload files`，把本文件夹里的
-   `index.html` 和 `video.mp4` 一起拖进去 → 点 `Commit changes`。
-3. 仓库顶部 `Settings` → 左侧 `Pages` → `Branch` 选 `main` → `Save`。
-4. 等约 1 分钟，页面顶部出现网址：
-   `https://你的用户名.github.io/birthday-gift/`
-   **这个网址就是最终要写进二维码和 NFC 的地址**。
+双击 index.html，或在本目录运行 `python -m http.server 8765` 后打开 http://localhost:8765/。
 
-## 以后怎么改内容（不用碰电脑上的文件）
+## 优化内容
 
-- **改文字**：GitHub 网页上点开 `index.html` → 右上铅笔图标编辑 →
-  只改文件中部 `CONFIG` 里引号内的文字 → `Commit changes`。约 1 分钟生效。
-- **换视频**：点开 `video.mp4` → `Replace` 上传新文件（保持同名，代码不用动）。
-- **改成跳转别的网站**：编辑 `index.html`，把 `CONFIG` 那段换成一行
-  `location.replace("https://新网址");`
+- 封面优先加载，WebP失败回退JPEG。
+- 内嵌小预览先显示，清晰照片就绪后淡入。
+- 封面完成后预热第一张；开启故事先加载两张，随后准备当前及后两张，最多同时下载两张。
+- 桌面虚化背景复用已下载照片，视频海报到附近才加载，视频点击播放才下载。
+- 开场视频尚未上传，默认直接进入故事，避免不存在文件造成黑屏等待。
+- 图片失败可重试，联网后恢复；挂起12秒释放下载位置。开场视频等待8秒后退出，重播清理旧计时器。
 
-## 本地预览
+## 更新
 
-直接双击 `index.html` 用浏览器打开即可（视频和文字都会正常显示）。
+文字仍在 index.html 的 CONFIG 中修改。上传 opening.mp4 后，把 CONFIG.openingVideo 改为 `"opening.mp4"` 启用开场视频。
+
+替换JPEG后运行以下命令，更新WebP、内嵌清单和封面预览（需要Pillow）：
+
+```powershell
+python tools/prepare_images.py --manifest ../ref/image-manifest.json --embed
+```
+
+保留JPEG回退文件。个别JPEG更小，会直接使用原JPEG。
+
+## 发布
+
+现有仓库为 Echo-rou/birthday-gift。先核对远端是否出现新提交，再更新根目录的 index.html、assets/、photos/ 和需要更新的 video.mp4。不要套一层 website 目录，也不要上传 ref 测试输出。
+
+沿用现有Pages设置，二维码/NFC地址仍是 https://echo-rou.github.io/birthday-gift/ 。旧工作区未修改。
+
+## 验证范围
+
+Chrome手机尺寸390×844、桌面1440×1000，冷缓存模拟1.6Mbps/150ms。12张照片、JPEG回退、失败恢复、视频播放、重播、照片及开场超时均通过。
+
+这不是手机真机或微信内置浏览器实测，也不包含GitHub Pages实际连接耗时；发布后需在目标手机扫码验收。详细结果和截图位于 ../ref/website-performance/。
