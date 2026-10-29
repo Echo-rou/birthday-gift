@@ -614,7 +614,7 @@ function buildStory() {
   prefetchAhead(1);
 }
 
-/* 只预取当前屏往后两屏：12 张同时下会平均瓜分带宽，首屏反而最慢 */
+/* 给当前屏往后两屏做解码预热（图片本身是 eager，会各自加载，这里只提前 decode 减少滚动时卡顿） */
 const donePrefetch = new Set();
 function prefetchAhead(from) {
   for (let k = from - 1; k <= from + 1; k++) {
@@ -633,7 +633,7 @@ function makeImg(m, cls) {
   im.alt = m.title || "";
   if (cls) im.className = cls;
   im.decoding = "async";
-  im.loading = "lazy";
+  im.loading = "eager";
   im.draggable = false;
   im.onerror = () => { im.style.display = "none"; im.closest(".sec")?.classList.add("nophoto"); };
   return im;
