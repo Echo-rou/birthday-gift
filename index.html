@@ -436,7 +436,7 @@
       <p class="kicker">CHAPTER · NOW</p>
       <h2 id="video-heading">今 年 的 这 一 章</h2>
     </div>
-    <div class="video-frame"><video id="video" controls playsinline preload="metadata"></video></div>
+    <div class="video-frame"><video id="video" controls playsinline preload="metadata" poster="assets/video-poster.jpg"></video></div>
     <p class="vb-note">这 一 年 的 碎 片</p>
   </section>
 
@@ -454,7 +454,7 @@
 </main>
 
 <div id="videowrap" hidden>
-  <video id="openingVideo" src="opening.mp4" playsinline preload="auto"></video>
+  <video id="openingVideo" src="opening.mp4" playsinline preload="none"></video>
   <button id="videoSkip" onclick="event.stopPropagation();skipOpening()">跳过 ↓</button>
 </div>
 
@@ -611,14 +611,20 @@ function buildStory() {
   }, { threshold: 0.28 });
   chapterEls.forEach(el => io.observe(el));
   updateActive();
+  prefetchAhead(1);
+}
 
-  /* 预取全部照片，滑到哪一屏都不会空一下 */
-  CONFIG.memories.forEach(m => {
-    if (!m.photo) return;
+/* 只预取当前屏往后两屏：12 张同时下会平均瓜分带宽，首屏反而最慢 */
+const donePrefetch = new Set();
+function prefetchAhead(from) {
+  for (let k = from - 1; k <= from + 1; k++) {
+    const m = CONFIG.memories[k];
+    if (!m || !m.photo || donePrefetch.has(m.photo)) continue;
+    donePrefetch.add(m.photo);
     const pre = new Image();
     pre.src = m.photo;
     if (pre.decode) pre.decode().catch(() => {});
-  });
+  }
 }
 
 function makeImg(m, cls) {
@@ -627,7 +633,7 @@ function makeImg(m, cls) {
   im.alt = m.title || "";
   if (cls) im.className = cls;
   im.decoding = "async";
-  im.loading = "eager";
+  im.loading = "lazy";
   im.draggable = false;
   im.onerror = () => { im.style.display = "none"; im.closest(".sec")?.classList.add("nophoto"); };
   return im;
@@ -653,6 +659,7 @@ function updateActive() {
     if (mid >= t && mid < b && el.dataset.index) idx = +el.dataset.index;
   });
   if (idx) setCounter(idx);
+  if (idx) prefetchAhead(idx);
   const lw = $("letterwrap");
   const atLetter = mid >= lw.offsetTop;
   document.body.classList.toggle("at-letter", atLetter);
