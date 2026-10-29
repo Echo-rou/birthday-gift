@@ -1,0 +1,145 @@
+{
+  "browser": "Real headed Chrome GUI on Windows",
+  "devices": "Viewport / UA simulation only; no physical iPhone, Android or WeChat devices tested",
+  "scenarios": [
+    {
+      "viewport": "390x844",
+      "result": "pass",
+      "natural_completion": true,
+      "skip_replay": true,
+      "javascript_errors": [],
+      "requests": [
+        "",
+        "assets/cover.webp",
+        "assets/opening-poster.jpg",
+        "opening.mp4",
+        "photos/021.webp",
+        "photos/027.webp",
+        "photos/077.jpg",
+        "photos/076.webp",
+        "photos/171.webp",
+        "photos/110.webp",
+        "photos/115.webp",
+        "photos/114.webp",
+        "photos/memory-09-quiet-moment.webp",
+        "photos/145.webp",
+        "photos/memory-11-camera.webp",
+        "photos/165.webp"
+      ]
+    },
+    {
+      "viewport": "375x667",
+      "result": "pass",
+      "natural_completion": false,
+      "skip_replay": true,
+      "javascript_errors": [],
+      "requests": [
+        "",
+        "assets/cover.webp",
+        "assets/opening-poster.jpg",
+        "opening.mp4",
+        "photos/021.webp",
+        "photos/027.webp",
+        "photos/077.jpg",
+        "photos/076.webp",
+        "photos/171.webp",
+        "photos/110.webp",
+        "photos/115.webp",
+        "photos/114.webp",
+        "photos/memory-09-quiet-moment.webp",
+        "photos/145.webp",
+        "photos/memory-11-camera.webp",
+        "photos/165.webp"
+      ]
+    },
+    {
+      "viewport": "320x568",
+      "result": "pass",
+      "natural_completion": false,
+      "skip_replay": true,
+      "javascript_errors": [],
+      "requests": [
+        "",
+        "assets/cover.webp",
+        "assets/opening-poster.jpg",
+        "opening.mp4",
+        "photos/021.webp",
+        "photos/027.webp",
+        "photos/077.jpg",
+        "photos/076.webp",
+        "photos/171.webp",
+        "photos/110.webp",
+        "photos/115.webp",
+        "photos/114.webp",
+        "photos/memory-09-quiet-moment.webp",
+        "photos/145.webp",
+        "photos/memory-11-camera.webp",
+        "photos/165.webp"
+      ]
+    },
+    {
+      "viewport": "1440x900",
+      "result": "pass",
+      "natural_completion": false,
+      "skip_replay": true,
+      "javascript_errors": [],
+      "requests": [
+        "",
+        "assets/cover.webp",
+        "assets/opening-poster.jpg",
+        "opening.mp4",
+        "photos/021.webp",
+        "photos/027.webp",
+        "photos/077.jpg",
+        "photos/076.webp",
+        "photos/171.webp",
+        "photos/110.webp",
+        "photos/115.webp",
+        "photos/114.webp",
+        "photos/memory-09-quiet-moment.webp",
+        "photos/145.webp",
+        "photos/memory-11-camera.webp",
+        "photos/165.webp"
+      ]
+    },
+    {
+      "name": "missing-opening",
+      "result": "pass"
+    },
+    {
+      "name": "playback-denied",
+      "result": "pass"
+    },
+    {
+      "name": "playback-stalled",
+      "result": "pass"
+    },
+    {
+      "name": "no-forced-wait",
+      "result": "pass"
+    },
+    {
+      "name": "old-fade-does-not-hide-replay",
+      "result": "pass"
+    },
+    {
+      "name": "iphone-safari-simulated",
+      "result": "pass",
+      "engine": "Windows Chrome; UA simulation, not real Safari/WeChat"
+    },
+    {
+      "name": "android-chrome-simulated",
+      "result": "pass",
+      "engine": "Windows Chrome; UA simulation, not real Safari/WeChat"
+    },
+    {
+      "name": "wechat-simulated",
+      "result": "pass",
+      "engine": "Windows Chrome; UA simulation, not real Safari/WeChat"
+    },
+    {
+      "name": "reduced-motion",
+      "result": "pass"
+    }
+  ]
+}

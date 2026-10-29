@@ -1,0 +1,46 @@
+const CONFIG = {
+  name: "亲爱的姐姐",
+  title: "三十岁生日快乐",
+  subtitle: "这一次，换我把这些年慢慢翻给你看。",
+  openingVideo: "", // 上传开场视频后填 "opening.mp4"；留空直接进入故事
+  memories: [
+    { photo:"photos/021.jpg", date:"2023 · 夏", title:"展厅里的光",
+      text:"那年夏天，光落在木地板上，你站在画前。", layout:"plate", ratio:"4 / 5", tilt:"-.9deg", pos:"50% 45%" },
+    { photo:"photos/027.jpg", date:"2023 · 夏", title:"树影",
+      text:"你侧过脸的那一下，我忽然觉得夏天很长。", layout:"full", pos:"56% 44%" },
+    { photo:"photos/077.jpg", date:"2025 · 儿童节", title:"草原上的风",
+      text:"往风里坐的人，多少岁都拦不住。", layout:"full", pos:"52% 42%" },
+    { photo:"photos/076.jpg", date:"2025 · 儿童节", title:"走过草地",
+      text:"草比你高，风比你急，你走得比谁都稳。", layout:"full", pos:"50% 36%" },
+    { photo:"photos/171.jpg", date:"2025 · 夏夜", title:"灯笼街",
+      text:"那天街很长，你一直没回头。我在后面记着。", layout:"plate", ratio:"4 / 5", tilt:".8deg", pos:"50% 33%", zoom:1.42 },
+    { photo:"photos/110.jpg", date:"2026 · 元旦", title:"一桌热气腾腾",
+      text:"人齐了，菜烫了，家就有了味道。", layout:"plate", ratio:"5 / 4", tilt:"-.6deg", pos:"50% 50%" },
+    { photo:"photos/115.jpg", date:"2026 · 除夕", title:"烟花照旧",
+      text:"烟花年年放，最好看的是抬头时，身边是自家人。", layout:"full", pos:"50% 46%" },
+    { photo:"photos/114.jpg", date:"2026 · 情人节", title:"斑马线",
+      text:"你低头看着手机，整条街的灯都替你亮着。", layout:"full", pos:"36% 42%" },
+    { photo:"photos/122.jpg", date:"2026 · 初春", title:"手心里的光",
+      text:"你回头看的那一眼，比手里那把星星还亮。", layout:"full", pos:"62% 38%" },
+    { photo:"photos/145.jpg", date:"2026 · 夏", title:"躺平",
+      text:"连猫都懂：跟你待着的地方，最安心。", layout:"plate", ratio:"5 / 4", tilt:".5deg", pos:"50% 50%" },
+    { photo:"photos/155.jpg", date:"2026 · 秋", title:"比个耶",
+      text:"笑起来还是二十岁的样子。", layout:"full", pos:"50% 34%" },
+    { photo:"photos/165.jpg", date:"2026 · 十月", title:"月亮",
+      text:"它一直都在。", layout:"finale", pos:"50% 42%" }
+  ],
+  videoHeading: "今 年 的 这 一 章",
+  video: "video.mp4",
+  letter: [
+    "三十岁这件事，我偷偷替你高兴了很久。",
+    "",
+    "你笑得最好看的那几张照片，旁边都有人在。草原上被风吹，花墙前回头，一桌子热气腾腾，烟花底下抬头看见的都是自家人。你笑起来的时候，旁边的人会跟着一起笑——这件事你自己大概不知道。",
+    "",
+    "做这张卡片时我想明白一件事：照片会褪色，但这张卡片不用怕。二维码和芯片里写的不是照片，是一个地址。以后每年我往里加一章，这张卡片就跟着你一起长大。三十岁的这一章，是我写的第一章。",
+    "",
+    "姐，往后每一年，都要像照片里那样笑。生日快乐。"
+  ].join("\n"),
+  sign: "—— 永远爱你的弟弟",
+  footer: "这个网址每年都会更新新的故事\n这张卡片，永远不会过期",
+};
+

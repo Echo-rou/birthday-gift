@@ -1,0 +1,39 @@
+{
+  "original_bytes": 3781558,
+  "output_bytes": 3386419,
+  "resolution": "720x1280",
+  "frames": 451,
+  "duration_seconds": 15.033333,
+  "video": "H.264 High / yuv420p / 30fps / CRF28 slow",
+  "audio": "Original AAC 44.1kHz stereo, packet bytes identical",
+  "audio_sha256": "ea0894e4b6a5b1e21b91c24b7abf85202a270aa28b90620bd7322da3ebbe979d",
+  "faststart_atoms": [
+    [
+      "ftyp",
+      0,
+      32
+    ],
+    [
+      "moov",
+      32,
+      16514
+    ],
+    [
+      "free",
+      16546,
+      8
+    ],
+    [
+      "mdat",
+      16554,
+      3369865
+    ]
+  ],
+  "sample_rgb_psnr_db": [
+    36.51,
+    41.98,
+    37.65,
+    43.18,
+    37.27
+  ]
+}

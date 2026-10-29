@@ -33,8 +33,12 @@ def main():
         parser.error("quality must be 1–100; max-edge must be at least 32")
 
     root = args.root.resolve()
-    paths = [root / "assets" / name for name in ("cover.jpg", "video-poster.jpg")]
-    paths += sorted((root / "photos").glob("*.jpg"))
+    # Only prepare the current story. Retired photos remain preserved without
+    # being included in the loading manifest or repeatedly transcoded.
+    html = (root / "index.html").read_text(encoding="utf-8")
+    active_photos = re.findall(r'photo:\s*"([^"]+)"', html)
+    paths = [root / "assets/cover.jpg"]
+    paths += [root / name for name in dict.fromkeys(active_photos)]
     manifest = {}
     original_bytes = selected_bytes = 0
     for path in paths:

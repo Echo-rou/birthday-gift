@@ -1,40 +1,37 @@
-# 生日网站 · 加载优化版
+# Birthday Gift · 时光放映
 
-基于提交 `07592c86004549c53985d576248b61b17ade5e80`，保留原来的12张照片、排版、文案和视频。本版本用于发布到现有 GitHub Pages，部署状态以仓库 Actions 和线上页面为准。详细进展见 [当前报告4](docs/当前报告4.md)。
+现有生日网站的内容与视觉更新。网址仍为 https://echo-rou.github.io/birthday-gift/ 。
 
-## 预览
+流程：封面 → 有声开场视频 → 时光放映序幕 → 问候 → 12张照片（第12张为月亮尾声）→ 信件。
 
-双击 index.html，或在本目录运行 `python -m http.server 8765` 后打开 http://localhost:8765/。
+## 本轮更新
 
-## 优化内容
+- 接入用户提供的15秒开场视频，720×1280 / 30fps / H.264 / AAC / faststart。保留原AAC音轨字节，不默认静音。
+- 移除旧“今年的这一章”结尾视频及初始化、UI、资源请求。旧视频已在本地备份，不再随网站发布。
+- 序幕暖金环境光与文字分句显现约2.6秒；视频遮罩完全退出后才开始。可立即下滑，尊重减少动态效果设置。
+- 替换数组第9和11张照片，使用真实本地素材，其他10项、信件和章节顺序不变。
+- 修整小屏相纸章节、封面文字、安全区域及跳过按钮；保持按需加载和图片重试机制。
 
-- 封面优先加载，WebP失败回退JPEG。
-- 内嵌小预览先显示，清晰照片就绪后淡入。
-- 封面完成后预热第一张；开启故事先加载两张，随后准备当前及后两张，最多同时下载两张。
-- 桌面虚化背景复用已下载照片，视频海报到附近才加载，视频点击播放才下载。
-- 开场视频尚未上传，默认直接进入故事，避免不存在文件造成黑屏等待。
-- 图片失败可重试，联网后恢复；挂起12秒释放下载位置。开场视频等待8秒后退出，重播清理旧计时器。
+详情见 [本轮验收报告](docs/当前报告5.md)，前一轮记录见 [报告4](docs/当前报告4.md)。
 
-## 更新
+## 预览与修改
 
-文字仍在 index.html 的 CONFIG 中修改。上传 opening.mp4 后，把 CONFIG.openingVideo 改为 `"opening.mp4"` 启用开场视频。
+在本目录运行 `python -m http.server 8765`，打开 http://localhost:8765/ 。
 
-替换JPEG后运行以下命令，更新WebP、内嵌清单和封面预览（需要Pillow）：
+所有故事内容集中在 index.html 的 CONFIG。openingVideo 留空可关闭开场视频；修改文件时保持用户点击后同步调用play，以保留有声播放权限。
+
+替换JPEG后运行（需要Pillow）：
 
 ```powershell
 python tools/prepare_images.py --manifest ../ref/image-manifest.json --embed
 ```
 
-保留JPEG回退文件。个别JPEG更小，会直接使用原JPEG。
+脚本只更新当前CONFIG里的12张照片及封面，保留原JPEG回退。已退役的照片留存，不会被页面加载。
 
-## 发布
+## 验证
 
-现有仓库为 Echo-rou/birthday-gift。先核对远端是否出现新提交，再更新根目录的 index.html、assets/、photos/ 和需要更新的 video.mp4。不要套一层 website 目录，也不要上传 ref 测试输出。
+真实Windows Chrome GUI完成四种视口：390×844、375×667、320×568、1440×900。视频实际播放、自然结束、跳过/重播、12章、信件和错误恢复等13项场景通过，保留截图。
 
-沿用现有Pages设置，二维码/NFC地址仍是 https://echo-rou.github.io/birthday-gift/ 。旧工作区未修改。
+iPhone Safari、Android Chrome、微信仅做Chrome中的视口/UA模拟，未测试真机或真实WebKit/微信内核；不能把UA模拟视为这些浏览器的兼容性认证。
 
-## 验证范围
-
-Chrome手机尺寸390×844、桌面1440×1000，冷缓存模拟1.6Mbps/150ms。12张照片、JPEG回退、失败恢复、视频播放、重播、照片及开场超时均通过。
-
-这不是手机真机或微信内置浏览器实测，也不包含GitHub Pages实际连接耗时；发布后需在目标手机扫码验收。详细结果和截图位于 ../ref/website-performance/。
+测试脚本及基线已随仓库提交。在Windows上安装Playwright后，运行 `python tools/test_gui.py`，使用默认安装位置的Chrome；结果写到已忽略的test-artifacts/round2目录。

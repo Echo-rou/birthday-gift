@@ -273,30 +273,6 @@
     font-size:9.5px;letter-spacing:.26em;color:rgba(239,233,223,.4);
   }
 
-  /* 视频 */
-  .videoblock{
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:calc(60px + env(safe-area-inset-top)) 22px calc(40px + env(safe-area-inset-bottom));
-    background:
-      radial-gradient(70% 45% at 50% 30%,rgba(216,178,122,.06),transparent 65%),
-      linear-gradient(168deg,#0d0b09,#0a0908 60%,#080706);
-  }
-  .vb-head{text-align:center;margin-bottom:26px}
-  .vb-head .kicker{margin-bottom:10px;letter-spacing:.4em}
-  .vb-head h2{
-    font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:.26em;
-  }
-  .video-frame{
-    width:100%;max-width:400px;border-radius:14px;overflow:hidden;
-    background:#000;box-shadow:0 24px 60px rgba(0,0,0,.6);
-    border:1px solid rgba(255,255,255,.07);
-  }
-  .video-frame video{width:100%;display:block;outline:none}
-  .vb-note{
-    margin-top:20px;font-size:10px;letter-spacing:.22em;color:rgba(239,233,223,.32);
-    text-align:center;
-  }
-
   /* ---------- 信 ---------- */
   #letterwrap{
     scroll-snap-align:start;
@@ -348,11 +324,11 @@
 
   /* 开场视频覆盖层 */
   #videowrap{
-    position:fixed;inset:0;z-index:80;background:#000;
+    position:fixed;inset:0;z-index:100;background:#050403;
     user-select:none;-webkit-user-select:none;
   }
   #openingVideo{
-    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;
+    position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#050403;
   }
   #videoSkip{
     position:absolute;top:calc(14px + env(safe-area-inset-top));right:14px;
@@ -360,7 +336,6 @@
     background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.16);
     border-radius:999px;padding:6px 13px;cursor:pointer;backdrop-filter:blur(6px);z-index:2;
   }
-  #confetti{position:fixed;inset:0;pointer-events:none;z-index:90}
 
   /* 桌面：照片完整显示，背景用同一张图虚化 */
   @media (min-aspect-ratio:1/1) and (min-width:900px){
@@ -401,14 +376,63 @@
     color:var(--ink);background:rgba(11,9,8,.8);font:12px var(--sans);cursor:pointer;
     white-space:nowrap;
   }
-  .video-frame video{aspect-ratio:16 / 9}
+
+  /* 时光放映：仅在视频交接完成后运行，不阻止下滑。 */
+  html.video-open,html.video-open body{overflow:hidden;overscroll-behavior:none}
+  .blackcard{isolation:isolate;background:#050403;padding:0 24px}
+  .prologue-light{
+    position:absolute;inset:0;pointer-events:none;opacity:0;
+    background:radial-gradient(ellipse 90% 55% at 18% 32%,rgba(192,143,77,.12),transparent 72%),
+      radial-gradient(ellipse 80% 42% at 90% 80%,rgba(136,89,41,.075),transparent 70%);
+  }
+  .prologue-in{position:relative;z-index:1;width:100%;text-align:center}
+  .prologue-label{font:9px var(--sans);letter-spacing:.45em;color:var(--gold);margin-bottom:38px}
+  .blackcard .bc-main{font-family:var(--serif);font-size:clamp(21px,5.5vw,27px);font-weight:400;line-height:1.9;letter-spacing:.2em;color:var(--ink)}
+  .bc-main>span{display:block}
+  .bc-main .intro-a{font-size:13px;letter-spacing:.4em;margin-bottom:15px;color:var(--ink-2)}
+  .intro-dot{color:var(--gold)}
+  .blackcard .bc-line{display:block;width:1px;height:44px;margin:32px auto 24px;background:linear-gradient(var(--gold-2),transparent)}
+  .blackcard .bc-sub{font:10px var(--sans);letter-spacing:.3em;color:var(--ink-2)}
+  .intro-piece{opacity:0;transform:translateY(8px)}
+  .prologue-running .intro-piece{animation:prologue-reveal .8s ease both}
+  .prologue-running .prologue-light{animation:prologue-light 2.6s ease both}
+  .prologue-running .intro-a{animation-delay:.25s}
+  .prologue-running .intro-b{animation-delay:.65s}
+  .prologue-running .intro-c{animation-delay:1s}
+  .prologue-running .bc-line{animation-delay:1.45s}
+  .prologue-running .bc-sub{animation-delay:1.8s}
+  @keyframes prologue-reveal{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes prologue-light{from{opacity:0}to{opacity:1}}
+  #videoStatus{position:absolute;left:20px;right:20px;bottom:calc(34px + env(safe-area-inset-bottom));z-index:1;text-align:center;font:11px var(--sans);letter-spacing:.12em;color:rgba(239,233,223,.7);transition:opacity .2s}
+  #videowrap.playing #videoStatus{opacity:0}
+  #videoSkip{min-height:44px;min-width:88px;color:var(--ink);border-color:rgba(239,233,223,.3)}
+  #replay{width:44px;height:44px}
+  #cover:focus-visible,#videoSkip:focus-visible,#replay:focus-visible{outline:2px solid var(--gold);outline-offset:-4px}
+  #letterwrap{background:linear-gradient(#050403,var(--bg) 100px);padding-top:84px}
+  @media(max-width:600px) and (max-height:740px){
+    .plate{padding:54px 22px 28px}
+    .plate .meta{margin-bottom:12px}
+    .plate .frame img{height:auto;max-height:calc(100svh - 270px);object-fit:contain}
+    .plate .frame-in{display:flex;justify-content:center;background-size:contain!important;background-repeat:no-repeat}
+    .plate .pt-title{font-size:20px;margin-top:17px}
+    .plate .pt-text{font-size:12px;line-height:1.85;margin-top:7px}
+    .cover-in{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+    .cover-hint{margin-top:22px}
+    .cover-rule{margin:18px 0 14px}
+    .cover-title .wish{font-size:clamp(25px,8.2vw,34px)}
+    .prologue-label{margin-bottom:26px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .intro-piece{opacity:1;transform:none}
+    .prologue-light{opacity:1}
+  }
 </style>
 </head>
 <body>
 
 <div id="progress" hidden><i></i></div>
 <div id="counter" hidden><b>01</b> / <span id="total">12</span></div>
-<button id="replay" hidden onclick="replay()">↺</button>
+<button id="replay" hidden onclick="replay()" aria-label="重播开场视频">↺</button>
 
 <!-- ============ 封面 ============ -->
 <header id="cover" role="button" tabindex="0" aria-label="开启生日礼物" onclick="openGift()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openGift()}">
@@ -435,9 +459,17 @@
 <!-- ============ 故事流 ============ -->
 <main id="story" hidden>
   <section class="sec blackcard" id="opening">
-    <p class="bc-main">别急 · 我们把时光慢慢放一遍</p>
-    <span class="bc-line"></span>
-    <p class="bc-sub">往下滑</p>
+    <div class="prologue-light" aria-hidden="true"></div>
+    <div class="prologue-in">
+      <p class="prologue-label intro-piece">时 光 放 映</p>
+      <h2 class="bc-main" aria-label="别急 · 我们把时光慢慢放一遍">
+        <span class="intro-piece intro-a" aria-hidden="true">别急<span class="intro-dot"> · </span></span>
+        <span class="intro-piece intro-b" aria-hidden="true">我们把时光</span>
+        <span class="intro-piece intro-c" aria-hidden="true">慢慢放一遍</span>
+      </h2>
+      <span class="bc-line intro-piece" aria-hidden="true"></span>
+      <p class="bc-sub intro-piece">往下滑<span aria-hidden="true"> ↓</span></p>
+    </div>
   </section>
 
   <section class="sec greet" id="greetcard">
@@ -449,15 +481,6 @@
   </section>
 
   <!-- 照片章节由 CONFIG.memories 注入 -->
-
-  <section class="sec videoblock">
-    <div class="vb-head">
-      <p class="kicker">CHAPTER · NOW</p>
-      <h2 id="video-heading">今 年 的 这 一 章</h2>
-    </div>
-    <div class="video-frame"><video id="video" controls playsinline preload="none" data-poster="assets/video-poster.jpg"></video></div>
-    <p class="vb-note">这 一 年 的 碎 片</p>
-  </section>
 
   <section id="letterwrap">
     <article class="letter-card">
@@ -473,11 +496,11 @@
 </main>
 
 <div id="videowrap" hidden>
-  <video id="openingVideo" playsinline preload="none"></video>
-  <button id="videoSkip" onclick="event.stopPropagation();skipOpening()">跳过 ↓</button>
+  <video id="openingVideo" playsinline webkit-playsinline x5-playsinline preload="none" aria-label="生日开场视频"></video>
+  <p id="videoStatus" role="status">正在打开这段回忆…</p>
+  <button id="videoSkip" onclick="event.stopPropagation();skipOpening()">跳过视频 ↓</button>
 </div>
 
-<canvas id="confetti"></canvas>
 
 <script>
 /* =====================================================================
@@ -496,7 +519,7 @@ const CONFIG = {
   name: "亲爱的姐姐",
   title: "三十岁生日快乐",
   subtitle: "这一次，换我把这些年慢慢翻给你看。",
-  openingVideo: "", // 上传开场视频后填 "opening.mp4"；留空直接进入故事
+  openingVideo: "opening.mp4", // 原音频保留；点击封面后有声播放
   memories: [
     { photo:"photos/021.jpg", date:"2023 · 夏", title:"展厅里的光",
       text:"那年夏天，光落在木地板上，你站在画前。", layout:"plate", ratio:"4 / 5", tilt:"-.9deg", pos:"50% 45%" },
@@ -514,17 +537,15 @@ const CONFIG = {
       text:"烟花年年放，最好看的是抬头时，身边是自家人。", layout:"full", pos:"50% 46%" },
     { photo:"photos/114.jpg", date:"2026 · 情人节", title:"斑马线",
       text:"你低头看着手机，整条街的灯都替你亮着。", layout:"full", pos:"36% 42%" },
-    { photo:"photos/122.jpg", date:"2026 · 初春", title:"手心里的光",
-      text:"你回头看的那一眼，比手里那把星星还亮。", layout:"full", pos:"62% 38%" },
+    { photo:"photos/memory-09-quiet-moment.jpg", date:"2026 · 五月", title:"停一停",
+      text:"喝一口，歇一会儿。愿你总有这样自在的片刻。", layout:"full", pos:"50% 42%" },
     { photo:"photos/145.jpg", date:"2026 · 夏", title:"躺平",
       text:"连猫都懂：跟你待着的地方，最安心。", layout:"plate", ratio:"5 / 4", tilt:".5deg", pos:"50% 50%" },
-    { photo:"photos/155.jpg", date:"2026 · 秋", title:"比个耶",
-      text:"笑起来还是二十岁的样子。", layout:"full", pos:"50% 34%" },
+    { photo:"photos/memory-11-camera.jpg", date:"2026 · 十月", title:"认真看世界",
+      text:"你认真看世界的样子，也值得被好好记下。", layout:"full", pos:"56% 40%" },
     { photo:"photos/165.jpg", date:"2026 · 十月", title:"月亮",
       text:"它一直都在。", layout:"finale", pos:"50% 42%" }
   ],
-  videoHeading: "今 年 的 这 一 章",
-  video: "video.mp4",
   letter: [
     "三十岁这件事，我偷偷替你高兴了很久。",
     "",
@@ -546,7 +567,7 @@ let storyBuilt = false;
 let giftOpened = false;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // IMAGE_MANIFEST: generated by tools/prepare_images.py
-const IMAGE_ASSETS = {"assets/cover.jpg":{"webp":"assets/cover.webp","width":939,"height":1280,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABcDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAQFAgP/xAAkEAACAQQCAgEFAAAAAAAAAAABAgMABBEhEkETMVEiI2Ghsf/EABYBAQEBAAAAAAAAAAAAAAAAAAEDAv/EABsRAAMAAgMAAAAAAAAAAAAAAAABEQIhEjJB/9oADAMBAAIRAxEAPwDMMVujBi4Het09Acr9B18moVvNxxnY+KdS4KqvvY73Rkq6a0XzLlV8rEr0ooqXLL9qNm2Cv7oqTwb9AjWirhnALYGN9U/y8tgYlXLRnnlT6paCRBZGKNAvI8mblknHXrVdLV5YQTCpL4yFAzn8VV9aaUCWRDFGSHJxgY1RTFrE9wxM9jv3jiB/aKnyDR//2Q=="},"assets/video-poster.jpg":{"webp":"assets/video-poster.webp","width":1280,"height":720,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAASACADASIAAhEBAxEB/8QAGQABAAIDAAAAAAAAAAAAAAAAAAQFAgMG/8QAIxAAAgIBAwMFAAAAAAAAAAAAAQIAAwUEETEhQYETFTRxkf/EABcBAAMBAAAAAAAAAAAAAAAAAAACAwT/xAAcEQACAgIDAAAAAAAAAAAAAAAAAQIDETESISL/2gAMAwEAAhEDEQA/AItWL0T0o3o1AlRvv9TL23RAfHpPiVdeWdUUEKQABzNqZio8qR5kuEs7NSsra7RPGg0HfR1H9nM5VEryV6VIEQN0UdpfJlNOeW2lBlHWzI3uh3Ut0IjRTWxLZQa8kWIiOQEREAP/2Q=="},"photos/021.jpg":{"webp":"photos/021.webp","width":1000,"height":1000,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgACADASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAABQYAAgME/8QAKBAAAgEDBAAFBQEAAAAAAAAAAQIDAAQRBRIhMSIjUXGRBhRBYYHh/8QAFwEBAQEBAAAAAAAAAAAAAAAAAgMAAf/EABoRAAIDAQEAAAAAAAAAAAAAAAABAgMREiH/2gAMAwEAAhEDEQA/AFBY3BxIjLnrIIrUIC4A3j+/5RqK6F3exmTAxIQVAwBkV3X+meBDGQdzc89DFESxP0Fabp6vNI1z5hRA4BOB+e6YlRIrKOcRqRtB2p0eccUMtUdPqSawkTy50MaMBx6g+1HZrVodJkgVgWjj2qQf3xzXDaJLpcxXbheCrnHzRA3N4FBaQkdY2jFa3GV1BiuAQaIvY3E2wG5CrJyOHIz8VGdvLwvGtNaVtLtjc2ty4VSMBsenVMGmOJkYsM+Mgg0rXFnNAhBbIHDYUjFTTbq50xm+2kDITkxScqfb0pQsiwyrZ//Z"},"photos/027.jpg":{"webp":"photos/027.webp","width":1000,"height":750,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAYACADASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAQFAwb/xAAmEAABBAEEAQMFAAAAAAAAAAABAAIDEQQFEhMxIUFhgTIzQlKx/8QAFgEBAQEAAAAAAAAAAAAAAAAAAQAC/8QAGBEAAwEBAAAAAAAAAAAAAAAAAAECESH/2gAMAwEAAhEDEQA/AIstFx2qxp+OMuJoJuNjfJvpSZwOdzWkHzQLU9o+WMVjmuFtm+r46Ra1cLDHWcJ+PCDVt5HNseyjhxYba4g+y6TV8xk+KYIwLovr57XNOTD4LWDztt2P27WsL9l8f3PRnqUIQSGDiSw6fJlZV80g20fxbf8AVFeLkoIQpGqP/9k="},"photos/076.jpg":{"webp":"photos/076.webp","width":750,"height":1000,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABgDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAMEBQYB/8QAIxAAAQMDAwUBAAAAAAAAAAAAAQACAwQREhMhMQVBYYGxFf/EABgBAQADAQAAAAAAAAAAAAAAAAIAAQME/8QAGxEAAwEAAwEAAAAAAAAAAAAAAAECEQMEEhT/2gAMAwEAAhEDEQA/ANJHJHLGHxOa9p4IKYeNws5+XS44sa5o8OKhVT3UfUIYtadrZRjqCXjfj4hPPNPEDyzWOA8IVMX1NsTWSn2L/EKfVAfLFma6o+qUstXVvex7cRYYA2cbbXHburAvA45SnnOcuBvw0elh1oWtsVVhIgMjYY9UjMNAdY90LgsTtdC5s0s//9k="},"photos/077.jpg":{"webp":"photos/077.jpg","width":750,"height":1000,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABgDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAYCAwUE/8QAJRAAAgIBBAEDBQAAAAAAAAAAAQIAAwQREiFBBSIxUWFxgZGh/8QAGAEAAwEBAAAAAAAAAAAAAAAAAAMFAQL/xAAcEQEAAgIDAQAAAAAAAAAAAAABABECAwQSITH/2gAMAwEAAhEDEQA/AO0WcSByUVwrOob4JkdygdDsgxUxWOX5BFscKrv6mPQk7Vr73bVTktjiLD+PtCUKorUIrllXgE9iESqP2HpM7y9q14FrVnV+Br8AmLYK7iB7Tf8AKDfhWpXXubg8fQxb0IbQjmUeOVjDFjbjZK249dnsWUcDowlNFNFOJjmpFDsAzN2Dpz+9f5CI3azDKpgj7P/Z"},"photos/110.jpg":{"webp":"photos/110.webp","width":1000,"height":750,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAYACADASIAAhEBAxEB/8QAGQAAAwADAAAAAAAAAAAAAAAAAAQFAQID/8QAKBAAAgEDAgUEAwEAAAAAAAAAAQIDAAQRBTESEyFRYSIyQcEUQoGR/8QAFgEBAQEAAAAAAAAAAAAAAAAAAgED/8QAGhEAAwEBAQEAAAAAAAAAAAAAAAERAhIhA//aAAwDAQACEQMRAD8A6TpPGY4ywhTPU8XU+M9qVvLq7uZo4llaFAvVY2KljnG++2Nu9UL5C+oBASpcDqOwyaIYoJQyXQVl/Xi8fOfisd/Xm1FWaS7e6WQtBqUsbxh+ENN7gMHpnffH+0rqdkttdxQwNzucpdeHfG2/ajWNPZb13s4zJC3t5fqIPbp5pzRUa2hk/IjKyA4AI9QG+PumtVUsLl0kbPzFYFyAAMZ2rSHTJZ4pAzettj9UUUuU3Q1oU03R5bS7mkBCp8IDv5rCcU0crtgGR2Zf7RRR0ufBJ30//9k="},"photos/114.jpg":{"webp":"photos/114.webp","width":750,"height":1000,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABgDASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAABQAEBgH/xAAnEAACAQMDAwMFAAAAAAAAAAABAgMABBEFEiEGE1EUMWEjMkGBkf/EABYBAQEBAAAAAAAAAAAAAAAAAAIDAf/EABgRAQEBAQEAAAAAAAAAAAAAAAEAESEC/9oADAMBAAIRAxEAPwA1oIoIS852oPfNHC6gkkCiJlTznJ/lNXXpru0aHuIXP2gZ4NALG1tK0TL9RTg/FENqelJCTSyV3LyDzVSOmyGTTkJDMUypwBVR1LeXmoQ+ktpFspAxlJCoh3MBnzWfSemL+9u1NyrJFnLuSCT8V0U9jbKsE1pAsY4UYHtn84pix2xx4QkgcHNMMpPrblxpj6dPc25fEYfch8giqt3UuXvU2Dnt8n9mqgnZjy//2Q=="},"photos/115.jpg":{"webp":"photos/115.webp","width":750,"height":1000,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABgDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAYCAwUE/8QAIxAAAgICAQQCAwAAAAAAAAAAAQIAAwQRIQUSQVEiMTJhgf/EABYBAQEBAAAAAAAAAAAAAAAAAAIAAf/EABcRAQEBAQAAAAAAAAAAAAAAAAEAERL/2gAMAwEAAhEDEQA/AE9F7joTqfAsWkOR9gH+SjHIVwW2PRHuMBvXIxw+xwOT7OvUCswlxkI8Ql2SfkR4hFGhTWXB5Gh+5o11MK9jx4hV04JS1y2lxWpZhoCMGPXQ1OMW7CL0VmLMFKyEplTKTRhNTrWBWmSwpur0DpefyhLotxv/2Q=="},"photos/122.jpg":{"webp":"photos/122.webp","width":1000,"height":750,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAYACADASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAUCAwQH/8QAJhAAAgICAQMCBwAAAAAAAAAAAQIDEQAEBQYSMRMhFCJBUXGxwf/EABYBAQEBAAAAAAAAAAAAAAAAAAMCBP/EABoRAQEBAAMBAAAAAAAAAAAAAAEAAgMRITH/2gAMAwEAAhEDEQA/AF0GrJy0p+FJYHyl1X5y3b6bEeiZEY+stlrFAj+Zd0nyUWi8nfGWLL7EY6nhblNBpYZSolsixZUX4zPzb12Izcech03OnWshV5q2oWhmdHILKxFg5nIFY5FMNeUxt8jUQPp9sb6XUE/G6xgRFeySrE0VJ/eGGHoH7WPkhnbuXuPuSfOUBSwtReGGXQ3/2Q=="},"photos/145.jpg":{"webp":"photos/145.webp","width":1000,"height":750,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAYACADASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAUBAwYC/8QAJxAAAQMEAQIGAwAAAAAAAAAAAQACAwQFESESE2EUIiMxUbFBQpH/xAAWAQEBAQAAAAAAAAAAAAAAAAABAAL/xAAXEQEBAQEAAAAAAAAAAAAAAAAAARFR/9oADAMBAAIRAxEAPwDq719RDERSwyCRuzzjy0jsUjffa2MdN7WNkHu4s3/Fs7vKI7dMBCZi8cBGP2J0s3RWAsu8EdV6obDzl15SfYDusy9JbFd7i9xcxxkDBl2IwQB30ntBLcK2m6rWQFpxji7Gfkdim9NQ04ozB4ePhktc3jo4P5VkVPHTgthjbG07w0ABFupeWqQ0A5xtCEFEYAnlb84ePo/SnQO0IUn/2Q=="},"photos/155.jpg":{"webp":"photos/155.webp","width":750,"height":1000,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABgDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAMFBAH/xAAnEAACAQQBAwMFAQAAAAAAAAABAgMABBESIQUiMRNBYRRRcYGR0f/EABcBAAMBAAAAAAAAAAAAAAAAAAECBAP/xAAYEQEBAQEBAAAAAAAAAAAAAAABAAIRIf/aAAwDAQACEQMRAD8A2fSuZMKDGPOrA5H+inG2tjLcG2uFdsDVA2efc126vFkjlxIPUEZA1z81D6kBAYbmIqjRFAND5B9v5UrjPUqDek7VorV5Gw/aB5+fxRWuCezdgVljY7cd2TzRSGSLtkmC2VUlhTL4I2yaiWtqJ+oSz3TH0IWJjiJ42qpZMX6YrI2Dzg4zzmlXMWlqIoO8t7/eqT32x6nllkiiaZ5rRjEF7mCjBHniiqFvEoYggE66n9UUk1//2Q=="},"photos/165.jpg":{"webp":"photos/165.webp","width":750,"height":1000,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABgDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAEDAgQF/8QAHxAAAgICAgMBAAAAAAAAAAAAAAECEQMSIVEEEzJB/8QAFwEBAQEBAAAAAAAAAAAAAAAAAAECA//EABURAQEAAAAAAAAAAAAAAAAAAAAR/9oADAMBAAIRAxEAPwD00hiNrHeJz2jw61/WdawyAtqACamx+19k7FfNWQUcmwOPzM+DHDTPTcvmMuE31YCq/9k="},"photos/171.jpg":{"webp":"photos/171.webp","width":750,"height":1000,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABgDASIAAhEBAxEB/8QAFwAAAwEAAAAAAAAAAAAAAAAAAAMEAf/EACQQAAEEAwAABgMAAAAAAAAAAAEAAgMRBBIhBRMUMUGBIlFx/8QAFwEAAwEAAAAAAAAAAAAAAAAAAQIDAP/EAB0RAAICAgMBAAAAAAAAAAAAAAABAhESMQMTIUL/2gAMAwEAAhEDEQA/ANhynVRaR9JsGYYshj281N/1KggfDKx2QWkir17d9tMJJyWNbDv5o6Tz8r+EscVso3Y+fPkyrlYw7bBoH0hQyxlkZY9wadr7fKQj1xfyZTktMaMdxAo2QABt+gtJmx52OunDoKvYAKCl8QI3ipzTQNi/ZQztUNj7ZDkzujllDxsNuGvewhXOw/VQwkmg27HyUJ1yAo//2Q=="}};
+const IMAGE_ASSETS = {"assets/cover.jpg":{"webp":"assets/cover.webp","width":939,"height":1280,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABcDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAQFAgP/xAAkEAACAQQCAgEFAAAAAAAAAAABAgMABBEhEkETMVEiI2Ghsf/EABYBAQEBAAAAAAAAAAAAAAAAAAEDAv/EABsRAAMAAgMAAAAAAAAAAAAAAAABEQIhEjJB/9oADAMBAAIRAxEAPwDMMVujBi4Het09Acr9B18moVvNxxnY+KdS4KqvvY73Rkq6a0XzLlV8rEr0ooqXLL9qNm2Cv7oqTwb9AjWirhnALYGN9U/y8tgYlXLRnnlT6paCRBZGKNAvI8mblknHXrVdLV5YQTCpL4yFAzn8VV9aaUCWRDFGSHJxgY1RTFrE9wxM9jv3jiB/aKnyDR//2Q=="},"photos/021.jpg":{"webp":"photos/021.webp","width":1000,"height":1000,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgACADASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAABQYAAgME/8QAKBAAAgEDBAAFBQEAAAAAAAAAAQIDAAQRBRIhMSIjUXGRBhRBYYHh/8QAFwEBAQEBAAAAAAAAAAAAAAAAAgMAAf/EABoRAAIDAQEAAAAAAAAAAAAAAAABAgMREiH/2gAMAwEAAhEDEQA/AFBY3BxIjLnrIIrUIC4A3j+/5RqK6F3exmTAxIQVAwBkV3X+meBDGQdzc89DFESxP0Fabp6vNI1z5hRA4BOB+e6YlRIrKOcRqRtB2p0eccUMtUdPqSawkTy50MaMBx6g+1HZrVodJkgVgWjj2qQf3xzXDaJLpcxXbheCrnHzRA3N4FBaQkdY2jFa3GV1BiuAQaIvY3E2wG5CrJyOHIz8VGdvLwvGtNaVtLtjc2ty4VSMBsenVMGmOJkYsM+Mgg0rXFnNAhBbIHDYUjFTTbq50xm+2kDITkxScqfb0pQsiwyrZ//Z"},"photos/027.jpg":{"webp":"photos/027.webp","width":1000,"height":750,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAYACADASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAQFAwb/xAAmEAABBAEEAQMFAAAAAAAAAAABAAIDEQQFEhMxIUFhgTIzQlKx/8QAFgEBAQEAAAAAAAAAAAAAAAAAAQAC/8QAGBEAAwEBAAAAAAAAAAAAAAAAAAECESH/2gAMAwEAAhEDEQA/AIstFx2qxp+OMuJoJuNjfJvpSZwOdzWkHzQLU9o+WMVjmuFtm+r46Ra1cLDHWcJ+PCDVt5HNseyjhxYba4g+y6TV8xk+KYIwLovr57XNOTD4LWDztt2P27WsL9l8f3PRnqUIQSGDiSw6fJlZV80g20fxbf8AVFeLkoIQpGqP/9k="},"photos/077.jpg":{"webp":"photos/077.jpg","width":750,"height":1000,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABgDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAYCAwUE/8QAJRAAAgIBBAEDBQAAAAAAAAAAAQIAAwQREiFBBSIxUWFxgZGh/8QAGAEAAwEBAAAAAAAAAAAAAAAAAAMFAQL/xAAcEQEAAgIDAQAAAAAAAAAAAAABABECAwQSITH/2gAMAwEAAhEDEQA/AO0WcSByUVwrOob4JkdygdDsgxUxWOX5BFscKrv6mPQk7Vr73bVTktjiLD+PtCUKorUIrllXgE9iESqP2HpM7y9q14FrVnV+Br8AmLYK7iB7Tf8AKDfhWpXXubg8fQxb0IbQjmUeOVjDFjbjZK249dnsWUcDowlNFNFOJjmpFDsAzN2Dpz+9f5CI3azDKpgj7P/Z"},"photos/076.jpg":{"webp":"photos/076.webp","width":750,"height":1000,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABgDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAMEBQYB/8QAIxAAAQMDAwUBAAAAAAAAAAAAAQACAwQREhMhMQVBYYGxFf/EABgBAQADAQAAAAAAAAAAAAAAAAIAAQME/8QAGxEAAwEAAwEAAAAAAAAAAAAAAAECEQMEEhT/2gAMAwEAAhEDEQA/ANJHJHLGHxOa9p4IKYeNws5+XS44sa5o8OKhVT3UfUIYtadrZRjqCXjfj4hPPNPEDyzWOA8IVMX1NsTWSn2L/EKfVAfLFma6o+qUstXVvex7cRYYA2cbbXHburAvA45SnnOcuBvw0elh1oWtsVVhIgMjYY9UjMNAdY90LgsTtdC5s0s//9k="},"photos/171.jpg":{"webp":"photos/171.webp","width":750,"height":1000,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABgDASIAAhEBAxEB/8QAFwAAAwEAAAAAAAAAAAAAAAAAAAMEAf/EACQQAAEEAwAABgMAAAAAAAAAAAEAAgMRBBIhBRMUMUGBIlFx/8QAFwEAAwEAAAAAAAAAAAAAAAAAAQIDAP/EAB0RAAICAgMBAAAAAAAAAAAAAAABAhESMQMTIUL/2gAMAwEAAhEDEQA/ANhynVRaR9JsGYYshj281N/1KggfDKx2QWkir17d9tMJJyWNbDv5o6Tz8r+EscVso3Y+fPkyrlYw7bBoH0hQyxlkZY9wadr7fKQj1xfyZTktMaMdxAo2QABt+gtJmx52OunDoKvYAKCl8QI3ipzTQNi/ZQztUNj7ZDkzujllDxsNuGvewhXOw/VQwkmg27HyUJ1yAo//2Q=="},"photos/110.jpg":{"webp":"photos/110.webp","width":1000,"height":750,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAYACADASIAAhEBAxEB/8QAGQAAAwADAAAAAAAAAAAAAAAAAAQFAQID/8QAKBAAAgEDAgUEAwEAAAAAAAAAAQIDAAQRBTESEyFRYSIyQcEUQoGR/8QAFgEBAQEAAAAAAAAAAAAAAAAAAgED/8QAGhEAAwEBAQEAAAAAAAAAAAAAAAERAhIhA//aAAwDAQACEQMRAD8A6TpPGY4ywhTPU8XU+M9qVvLq7uZo4llaFAvVY2KljnG++2Nu9UL5C+oBASpcDqOwyaIYoJQyXQVl/Xi8fOfisd/Xm1FWaS7e6WQtBqUsbxh+ENN7gMHpnffH+0rqdkttdxQwNzucpdeHfG2/ajWNPZb13s4zJC3t5fqIPbp5pzRUa2hk/IjKyA4AI9QG+PumtVUsLl0kbPzFYFyAAMZ2rSHTJZ4pAzettj9UUUuU3Q1oU03R5bS7mkBCp8IDv5rCcU0crtgGR2Zf7RRR0ufBJ30//9k="},"photos/115.jpg":{"webp":"photos/115.webp","width":750,"height":1000,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABgDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAYCAwUE/8QAIxAAAgICAQQCAwAAAAAAAAAAAQIAAwQRIQUSQVEiMTJhgf/EABYBAQEBAAAAAAAAAAAAAAAAAAIAAf/EABcRAQEBAQAAAAAAAAAAAAAAAAEAERL/2gAMAwEAAhEDEQA/AE9F7joTqfAsWkOR9gH+SjHIVwW2PRHuMBvXIxw+xwOT7OvUCswlxkI8Ql2SfkR4hFGhTWXB5Gh+5o11MK9jx4hV04JS1y2lxWpZhoCMGPXQ1OMW7CL0VmLMFKyEplTKTRhNTrWBWmSwpur0DpefyhLotxv/2Q=="},"photos/114.jpg":{"webp":"photos/114.webp","width":750,"height":1000,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABgDASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAABQAEBgH/xAAnEAACAQMDAwMFAAAAAAAAAAABAgMABBEFEiEGE1EUMWEjMkGBkf/EABYBAQEBAAAAAAAAAAAAAAAAAAIDAf/EABgRAQEBAQEAAAAAAAAAAAAAAAEAESEC/9oADAMBAAIRAxEAPwA1oIoIS852oPfNHC6gkkCiJlTznJ/lNXXpru0aHuIXP2gZ4NALG1tK0TL9RTg/FENqelJCTSyV3LyDzVSOmyGTTkJDMUypwBVR1LeXmoQ+ktpFspAxlJCoh3MBnzWfSemL+9u1NyrJFnLuSCT8V0U9jbKsE1pAsY4UYHtn84pix2xx4QkgcHNMMpPrblxpj6dPc25fEYfch8giqt3UuXvU2Dnt8n9mqgnZjy//2Q=="},"photos/memory-09-quiet-moment.jpg":{"webp":"photos/memory-09-quiet-moment.webp","width":1200,"height":1600,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABgDASIAAhEBAxEB/8QAGwAAAgEFAAAAAAAAAAAAAAAAAAUEAQIDBgf/xAAlEAACAgIBAwMFAAAAAAAAAAABAgMEABESBSExIkFRFDJhkbH/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABkRAAIDAQAAAAAAAAAAAAAAAAABAhEhQf/aAAwDAQACEQMRAD8AR9cqx1b/AAiXipQHWyci16rTEeliD44jzlkkjzNylkZ28bY7OMKUk8KGMJ6SvHYP6IyvCJWQrlP6edo0YuVGyNdxhlEmswzGZXKuAU3vv4wyBqjE7BRs436a/GojSROpckBm8EDWv7iOVtSaHbjnRaNuXqUIUcApjAYMB8ewxNcLDNNYv9LQU1uGTg7txVCPv+SPwMMX37ViSy7W3JkU8Cg7BNewGGIqkJaz/9k="},"photos/145.jpg":{"webp":"photos/145.webp","width":1000,"height":750,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAYACADASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAUBAwYC/8QAJxAAAQMEAQIGAwAAAAAAAAAAAQACAwQFESESE2EUIiMxUbFBQpH/xAAWAQEBAQAAAAAAAAAAAAAAAAABAAL/xAAXEQEBAQEAAAAAAAAAAAAAAAAAARFR/9oADAMBAAIRAxEAPwDq719RDERSwyCRuzzjy0jsUjffa2MdN7WNkHu4s3/Fs7vKI7dMBCZi8cBGP2J0s3RWAsu8EdV6obDzl15SfYDusy9JbFd7i9xcxxkDBl2IwQB30ntBLcK2m6rWQFpxji7Gfkdim9NQ04ozB4ePhktc3jo4P5VkVPHTgthjbG07w0ABFupeWqQ0A5xtCEFEYAnlb84ePo/SnQO0IUn/2Q=="},"photos/memory-11-camera.jpg":{"webp":"photos/memory-11-camera.webp","width":1200,"height":1600,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABgDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAMFBAL/xAAoEAACAgIBAwMDBQAAAAAAAAABAgMRAAQhBRMxEiJxBhRBUWGBkbH/xAAXAQADAQAAAAAAAAAAAAAAAAAAAQID/8QAGhEAAwADAQAAAAAAAAAAAAAAAAERAhJRIf/aAAwDAQACEQMRAD8AdFv6+5q9yDXlhVLoeoA8DmhfPnMet1GWaOQ6XokVSHYy0GH8ms66tsQnpxfWli9oIRYjRJPF1kro8Ez1MUpAwUA17/1HP4rM6pTSewoL9Q7vdaJdaOR18qlkivjDKtx6KBoYXck1SrZAwxbYhqx2okayNKdWGOWuO2B4zJvRyfcd2B0igjViwKWGJygIjGCfUoH7LX+YtlM1KSD+BY4yEyiVB02OZe4NiWGgRS3Vg/Pz/WGU11xAWUBjyTa1XPPg4Y9uoJxn/9k="},"photos/165.jpg":{"webp":"photos/165.webp","width":750,"height":1000,"preview":"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//gAQTGF2YzYyLjI4LjEwMQD/2wBDABIMDRANCxIQDhAUExIVGywdGxgYGzYnKSAsQDlEQz85Pj1HUGZXR0thTT0+WXlaYWltcnNyRVV9hnxvhWZwcm7/2wBDARMUFBsXGzQdHTRuST5Jbm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm5ubm7/wAARCAAgABgDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAEDAgQF/8QAHxAAAgICAgMBAAAAAAAAAAAAAAECEQMSIVEEEzJB/8QAFwEBAQEBAAAAAAAAAAAAAAAAAAECA//EABURAQEAAAAAAAAAAAAAAAAAAAAR/9oADAMBAAIRAxEAPwD00hiNrHeJz2jw61/WdawyAtqACamx+19k7FfNWQUcmwOPzM+DHDTPTcvmMuE31YCq/9k="}};
 // END_IMAGE_MANIFEST
 
 function buildStory() {
@@ -556,16 +577,6 @@ function buildStory() {
     `<span class="g-name">${esc(CONFIG.name)}</span>` +
     `<span class="g-title">${esc(CONFIG.title)}</span>`;
   $("subtitle").innerHTML = CONFIG.subtitle.replace(/\n/g, "<br>");
-  const videoBlock = document.querySelector('.videoblock');
-  if (!CONFIG.video) videoBlock.hidden = true;
-  else if ('IntersectionObserver' in window) {
-    const videoObserver = new IntersectionObserver(entries => {
-      if (!entries.some(e => e.isIntersecting)) return;
-      prepareVideo();
-      videoObserver.disconnect();
-    }, { rootMargin: '100% 0px' });
-    videoObserver.observe(videoBlock);
-  } else prepareVideo();
   $("letter").innerHTML = CONFIG.letter
     .split(/\n{2,}/)
     .map(p => `<p>${esc(p).replace(/\n/g, "<br>")}</p>`)
@@ -574,7 +585,6 @@ function buildStory() {
   $("footer").innerHTML =
     CONFIG.footer.replace(/\n/g, "<br>") +
     '<div class="foot-line"></div><div class="foot-hint">碰 一 碰 · 或 扫 一 扫</div>';
-  $("video-heading").textContent = CONFIG.videoHeading || "";
 
   const total = CONFIG.memories.length;
   $("total").textContent = String(total).padStart(2, "0");
@@ -654,14 +664,6 @@ function buildStory() {
     }, { threshold: 0.28 });
     chapterEls.forEach(el => io.observe(el));
   } else chapterEls.forEach(el => el.classList.add('in', 'inview'));
-}
-
-function prepareVideo() {
-  const v = $('video');
-  if (!CONFIG.video || v.hasAttribute('src')) return;
-  v.poster = v.dataset.poster;
-  v.src = CONFIG.video;
-  // preload=none：真正点击播放时才下载视频。
 }
 
 // 只给当前位置和后两张赋真实 URL，不依赖绝对定位图片的 native lazy 判断。
@@ -768,8 +770,7 @@ function warmFirstPhoto() {
   if (navigator.connection?.saveData) return;
   const warm = () => {
     if (giftOpened) return;
-    buildStory();
-    prefetchAhead(1, 1);
+    buildStory(); // 先构建章节，不让预热照片争抢开场视频带宽。
   };
   if ('requestIdleCallback' in window) requestIdleCallback(warm, { timeout: 1200 });
   else setTimeout(warm, 300);
@@ -789,7 +790,7 @@ function setCounter(n) {
 
 /* 当前正中那一屏 → 更新计数；进入信页 → 收起悬浮控件 */
 function updateActive() {
-  if (!giftOpened || !chapterEls.length) return;
+  if (!giftOpened || !chapterEls.length || !document.getElementById('videowrap').hidden) return;
   const mid = scrollY + innerHeight * .5;
   let idx = 0;
   chapterEls.forEach(el => {
@@ -827,95 +828,122 @@ function openGift() {
   $("cover").style.display = "none";
   $("story").hidden = false;
   buildStory();
-  prefetchAhead(1, 2);
   scrollTo(0, 0);
   $("replay").hidden = false;
   $("progress").hidden = false;
   $("counter").hidden = false;
-  confetti();
   playOpening();
   onScroll();
 }
 
-/* ---------- 开场视频 ---------- */
+/* ---------- 开场视频与序幕的交接 ---------- */
 let openingTimer;
 let openingFade;
 let openingRun = 0;
+let openingClosing = false;
+let prologueStarted = false;
+let prologueObserver;
+
+function resetPrologue() {
+  prologueObserver?.disconnect();
+  prologueStarted = false;
+  $('opening').classList.remove('prologue-running');
+}
+function startPrologue() {
+  if (prologueStarted || !$('videowrap').hidden) return;
+  const start = () => {
+    if (prologueStarted || !$('videowrap').hidden) return;
+    prologueStarted = true;
+    $('opening').classList.add('prologue-running');
+    prologueObserver?.disconnect();
+  };
+  if ('IntersectionObserver' in window) {
+    prologueObserver = new IntersectionObserver(entries => {
+      if (entries.some(e => e.isIntersecting)) start();
+    }, { threshold: .25 });
+    prologueObserver.observe($('opening'));
+  } else start();
+}
 function playOpening() {
   clearTimeout(openingTimer);
   clearTimeout(openingFade);
   const run = ++openingRun;
   const wrap = $('videowrap');
   const v = $('openingVideo');
-  if (!CONFIG.openingVideo) { wrap.hidden = true; return; }
+  resetPrologue();
+  openingClosing = false;
   wrap.hidden = false;
+  wrap.classList.remove('playing');
   wrap.style.opacity = '1';
   wrap.style.transition = 'none';
+  document.documentElement.classList.add('video-open');
+  $('replay').hidden = true;
+  $('counter').hidden = true;
+  $('progress').hidden = true;
   v.onended = () => { if (run === openingRun) endOpening(false); };
   v.onerror = () => { if (run === openingRun) endOpening(true); };
   const waitForVideo = () => {
+    if (run !== openingRun || openingClosing) return;
+    wrap.classList.remove('playing');
     clearTimeout(openingTimer);
     openingTimer = setTimeout(() => { if (run === openingRun) endOpening(true); }, 8000);
   };
   v.onwaiting = waitForVideo;
-  v.onplaying = () => clearTimeout(openingTimer);
-  v.src = CONFIG.openingVideo;
+  v.onstalled = () => { if (!openingTimer) waitForVideo(); };
+  v.onplaying = () => {
+    if (run !== openingRun) return;
+    clearTimeout(openingTimer);
+    openingTimer = null;
+    wrap.classList.add('playing');
+  };
+  if (!CONFIG.openingVideo) { endOpening(true); return; }
+  v.poster = 'assets/opening-poster.jpg';
+  if (v.getAttribute('src') !== CONFIG.openingVideo) v.src = CONFIG.openingVideo;
+  else v.currentTime = 0; // 重播复用已有媒体缓冲，不反复 load。
   waitForVideo();
-  const play = v.play(); // 保持在点击手势内，兼容手机浏览器的播放策略。
+  const play = v.play(); // 必须同步调用，保留封面点击带来的有声播放权限。
   if (play) play.catch(() => { if (run === openingRun) endOpening(true); });
 }
 function skipOpening() { endOpening(true); }
 function endOpening(immediate = false) {
   const wrap = $('videowrap');
   const v = $('openingVideo');
-  if (wrap.hidden) return;
-  ++openingRun;
+  if (wrap.hidden || openingClosing) return;
+  openingClosing = true;
+  const run = ++openingRun;
   clearTimeout(openingTimer);
+  openingTimer = null;
   clearTimeout(openingFade);
-  v.onended = v.onerror = v.onwaiting = v.onplaying = null;
+  v.onended = v.onerror = v.onwaiting = v.onplaying = v.onstalled = null;
+  const completed = v.ended;
   v.pause();
-  v.removeAttribute('src');
-  v.load();
-  scrollTo(0, 0);
-  if (immediate || reducedMotion) { wrap.hidden = true; return; }
-  wrap.style.transition = 'opacity 1.6s ease';
+  // 跳过/失败时停止后续下载；完整播完保留缓冲用于用户主动重播。
+  if (!completed) { v.removeAttribute('src'); v.load(); }
+  scrollTo({ top:0, behavior:'instant' });
+  const reveal = () => {
+    if (run !== openingRun) return;
+    wrap.hidden = true;
+    openingClosing = false;
+    document.documentElement.classList.remove('video-open');
+    $('replay').hidden = false;
+    $('progress').hidden = false;
+    $('counter').hidden = false;
+    startPrologue(); // 遮罩完全消失后才启动2.6秒序幕。
+    prefetchAhead(1,2);
+    onScroll();
+  };
+  if (immediate || reducedMotion) { reveal(); return; }
+  wrap.style.transition = 'opacity .55s ease';
   wrap.style.opacity = '0';
-  openingFade = setTimeout(() => { wrap.hidden = true; }, 1700);
+  openingFade = setTimeout(reveal, 580);
 }
-
 function replay() {
-  const v = $("video");
-  if (v) v.pause();
-  scrollTo({ top: 0, behavior: "auto" });
+  if (!$('videowrap').hidden) return;
+  scrollTo({ top:0, behavior:'instant' });
   setCounter(1);
   playOpening();
 }
 
-/* 彩带 */
-function confetti() {
-  if (reducedMotion) return;
-  const c = $("confetti"), ctx = c.getContext("2d");
-  c.width = innerWidth; c.height = innerHeight;
-  const colors = ["#d8b27a", "#efe9df", "#b98a5e", "#9d3f2f", "#e8d6b0"];
-  const pieces = Array.from({ length: 80 }, () => ({
-    x: Math.random() * c.width, y: -20 - Math.random() * c.height * .4,
-    w: 3 + Math.random() * 5, h: 6 + Math.random() * 7,
-    vy: 1.6 + Math.random() * 2.6, vx: -1 + Math.random() * 2,
-    rot: Math.random() * Math.PI, vr: -.1 + Math.random() * .2,
-    color: colors[Math.floor(Math.random() * colors.length)],
-  }));
-  const t0 = Date.now();
-  (function draw() {
-    ctx.clearRect(0, 0, c.width, c.height);
-    pieces.forEach(p => {
-      p.x += p.vx; p.y += p.vy; p.rot += p.vr;
-      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
-      ctx.fillStyle = p.color; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
-    });
-    if (Date.now() - t0 < 3400) requestAnimationFrame(draw);
-    else ctx.clearRect(0, 0, c.width, c.height);
-  })();
-}
 </script>
 </body>
 </html>
