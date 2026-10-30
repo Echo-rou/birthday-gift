@@ -10,7 +10,7 @@
 <meta property="og:description" content="这里装着我们一起走过的日子。">
 <meta property="og:image" content="https://echo-rou.github.io/birthday-gift/assets/cover.jpg">
 <meta property="og:type" content="website">
-<link rel="preload" as="image" href="assets/cover.webp" type="image/webp" fetchpriority="high">
+<link rel="preload" as="image" href="https://gcore.jsdelivr.net/gh/Echo-rou/birthday-gift@040fd03/assets/cover.webp" type="image/webp" fetchpriority="high">
 <style>
   :root{
     --bg:#0b0908;
@@ -438,10 +438,10 @@
 <!-- ============ 封面 ============ -->
 <header id="cover" role="button" tabindex="0" aria-label="开启生日礼物" onclick="openGift()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openGift()}">
   <picture>
-    <source srcset="assets/cover.webp" type="image/webp">
-    <img class="cover-bg" src="assets/cover.jpg" alt="" fetchpriority="high" loading="eager" decoding="async"
+    <source srcset="https://gcore.jsdelivr.net/gh/Echo-rou/birthday-gift@040fd03/assets/cover.webp" type="image/webp">
+    <img class="cover-bg" src="https://gcore.jsdelivr.net/gh/Echo-rou/birthday-gift@040fd03/assets/cover.jpg" alt="" fetchpriority="high" loading="eager" decoding="async"
       onload="this.classList.add('is-loaded')"
-      onerror="if(this.previousElementSibling){this.previousElementSibling.remove();this.src='assets/cover.jpg'}">
+      onerror="if(this.dataset.fb)return;this.dataset.fb='1';if(this.previousElementSibling){this.previousElementSibling.remove()}this.src='https://echo-rou.github.io/birthday-gift/assets/cover.jpg'">
   </picture>
   <div class="cover-veil"></div>
   <div class="cover-top"><span>2026</span><span>FOR · MY · SISTER</span></div>
@@ -559,6 +559,14 @@ const CONFIG = {
   sign: "—— 永远爱你的弟弟",
   footer: "这个网址每年都会更新新的故事\n这张卡片，永远不会过期",
 };
+
+/* ---------- 资源域名 ---------- */
+// 图片与视频走 jsDelivr 的 gcore 节点（国内实测约为 GitHub Pages 的 6–8 倍）。
+// 注意：cdn.jsdelivr.net 与 fastly.jsdelivr.net 会把请求 301 到 raw.githubusercontent.com，
+// 该域名在国内不可达，必须用 gcore 节点。
+// 版本号 040fd03 是素材定版提交；以后替换照片/视频后，把这里的 sha 改成新的提交号即可。
+const ASSET_BASE = 'https://gcore.jsdelivr.net/gh/Echo-rou/birthday-gift@040fd03/';
+const ASSET_ORIGIN = 'https://echo-rou.github.io/birthday-gift/';
 
 /* ---------- 页面逻辑 ---------- */
 const $ = id => document.getElementById(id);
@@ -693,7 +701,7 @@ function drainPhotos() {
       im.failPhoto();
       im.removeAttribute('src');
     }, 12000);
-    im.src = IMAGE_ASSETS[im.dataset.photo]?.webp || im.dataset.photo;
+    im.src = ASSET_BASE + (IMAGE_ASSETS[im.dataset.photo]?.webp || im.dataset.photo);
   }
 }
 
@@ -744,11 +752,17 @@ function makeImg(m, cls) {
   };
   im.onerror = () => {
     if (im.dataset.state !== 'loading') return;
-    // WebP 不支持或资源失败时回退到原 JPEG，仍占用同一个队列位置。
+    // 三级回退：CDN 的 webp → CDN 的原图 → GitHub Pages 原图，仍占用同一个队列位置。
     const alternative = IMAGE_ASSETS[m.photo]?.webp;
-    if (!im.dataset.fallback && alternative && alternative !== m.photo) {
-      im.dataset.fallback = 'true';
-      im.src = m.photo;
+    const stage = +(im.dataset.fallback || 0);
+    if (stage === 0 && alternative && alternative !== m.photo) {
+      im.dataset.fallback = '1';
+      im.src = ASSET_BASE + m.photo;
+      return;
+    }
+    if (stage < 2) {
+      im.dataset.fallback = '2';
+      im.src = ASSET_ORIGIN + m.photo;
       return;
     }
     im.failPhoto();
@@ -882,7 +896,18 @@ function playOpening() {
   $('counter').hidden = true;
   $('progress').hidden = true;
   v.onended = () => { if (run === openingRun) endOpening(false); };
-  v.onerror = () => { if (run === openingRun) endOpening(true); };
+  v.onerror = () => {
+    if (run !== openingRun) return;
+    if (!v.dataset.fb) {
+      // CDN 取片失败时回源 github.io，再失败才跳过开场。
+      v.dataset.fb = '1';
+      v.src = ASSET_ORIGIN + CONFIG.openingVideo;
+      const retry = v.play();
+      if (retry) retry.catch(() => { if (run === openingRun) endOpening(true); });
+      return;
+    }
+    endOpening(true);
+  };
   const waitForVideo = () => {
     if (run !== openingRun || openingClosing) return;
     wrap.classList.remove('playing');
@@ -898,8 +923,9 @@ function playOpening() {
     wrap.classList.add('playing');
   };
   if (!CONFIG.openingVideo) { endOpening(true); return; }
-  v.poster = 'assets/opening-poster.jpg';
-  if (v.getAttribute('src') !== CONFIG.openingVideo) v.src = CONFIG.openingVideo;
+  v.poster = ASSET_BASE + 'assets/opening-poster.jpg';
+  const videoUrl = v.dataset.fb ? ASSET_ORIGIN + CONFIG.openingVideo : ASSET_BASE + CONFIG.openingVideo;
+  if (v.getAttribute('src') !== videoUrl) v.src = videoUrl;
   else v.currentTime = 0; // 重播复用已有媒体缓冲，不反复 load。
   waitForVideo();
   const play = v.play(); // 必须同步调用，保留封面点击带来的有声播放权限。
